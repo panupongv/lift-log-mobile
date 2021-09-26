@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -36,9 +38,18 @@ class TempPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: TextButton(onPressed: () => {
-        print("MOFO")
-      }, child: Text("Hello")),
+      child: TextButton(onPressed: () async {
+
+
+        final xxx = await http.get(
+          Uri.parse("$baseUrl/produser/exercises"),
+          headers: {
+            HttpHeaders.authorizationHeader: 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InByb2R1c2VyIiwiaWF0IjoxNjI5NjYzNjk2fQ._8Uj9JXE-JUugIbBXgCf-IOsWhBiEsQuREUKjCwmYjA'
+          },
+        );
+        print("MOFO "  + xxx.body.toString());
+      }, 
+      child: const Text("Hello")),
     );
   }
 
