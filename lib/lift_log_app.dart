@@ -15,7 +15,7 @@ class LiftLogApp extends StatefulWidget {
 class _LiftLogAppState extends State<LiftLogApp> {
 
   int _currentTab = 0;
-  List<Widget> _tabs = [
+  final List<Widget> _tabs = [
     OverviewTab(),
     LogTab(),
     ExerciseLibraryTab(),
@@ -30,43 +30,24 @@ class _LiftLogAppState extends State<LiftLogApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        title: 'Flutter Demo',
-        home: Scaffold(
-          body: _tabs[_currentTab],
-          bottomNavigationBar: BottomNavigationBar(
-            currentIndex: _currentTab,
-            onTap: _onTabTapped,
-            
-            items: [
-              BottomNavigationBarItem(
-                icon: new Icon(Icons.home),
-                label: 'Home',
-              ),
-              BottomNavigationBarItem(
-                icon: new Icon(Icons.mail),
-                label: "message",
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.person),
-                label: "Profile",
-              )
-            ],
+      home: DefaultTabController(
+        length: 3,
+        child: Scaffold(
+          appBar: AppBar(
+            bottom: const TabBar(
+              tabs: [
+                Tab(icon: Icon(Icons.directions_car)),
+                Tab(icon: Icon(Icons.directions_transit)),
+                Tab(icon: Icon(Icons.directions_bike)),
+              ],
+            ),
+            title: const Text('Tabs Demo'),
           ),
-        )
-        //home: DefaultTabController(
-        //  length: 3,
-        //  child: Scaffold(
-        //    appBar: AppBar(
-        //      bottom: const TabBar(
-        //        tabs: [
-        //          Tab(icon: Icon(Icons.directions_car)),
-        //          Tab(icon: Icon(Icons.directions_transit)),
-        //          Tab(icon: Icon(Icons.directions_bike)),
-        //        ],
-        //      ),
-        //    ),
-        //  ),
-        //),
-        );
+          body: TabBarView(
+            children: _tabs,
+          ),
+        ),
+      ),
+    );
   }
 }
