@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:liftlogmobile/services/local_storage_service.dart';
 
-import 'screens/overview/overview_tab.dart'; 
+import 'models/user.dart';
+import 'screens/overview/overview_tab.dart';
 import 'screens/exercise_library/exercise_library_tab.dart';
 import 'screens/log/log_tab.dart';
 
@@ -13,7 +15,6 @@ class LiftLogApp extends StatefulWidget {
 }
 
 class _LiftLogAppState extends State<LiftLogApp> {
-
   int _currentTab = 0;
   final List<Widget> _tabs = [
     OverviewTab(),
@@ -27,8 +28,38 @@ class _LiftLogAppState extends State<LiftLogApp> {
     });
   }
 
-  @override
   Widget build(BuildContext context) {
+    return MaterialApp(
+      home: ListView(
+        children: [
+          TextButton(
+            onPressed: () async {
+              await LocalStorageService.saveUser(User("Dis Username", "Tokennn"));
+            },
+            child: Text("save"),
+          ),
+
+          TextButton(
+            onPressed: () async {
+              User? user = await LocalStorageService.loadSavedUser();
+              print(user!.toJson());
+            },
+            child: Text("load"),
+          ),
+
+          TextButton(
+            onPressed: () async {
+              await LocalStorageService.removeSavedUser();
+            },
+            child: Text("clear"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget _build(BuildContext context) {
     return MaterialApp(
       home: DefaultTabController(
         length: 3,
