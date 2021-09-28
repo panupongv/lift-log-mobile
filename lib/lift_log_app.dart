@@ -15,46 +15,40 @@ class LiftLogApp extends StatefulWidget {
 }
 
 class _LiftLogAppState extends State<LiftLogApp> {
-  int _currentTab = 0;
   final List<Widget> _tabs = [
     OverviewTab(),
     LogTab(),
     ExerciseLibraryTab(),
   ];
 
-  void _onTabTapped(int index) {
-    setState(() {
-      _currentTab = index;
-    });
-  }
-
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: ListView(
-        children: [
-          TextButton(
-            onPressed: () async {
-              await LocalStorageService.saveUser(User("Dis Username", "Tokennn"));
-            },
-            child: Text("save"),
-          ),
-
-          TextButton(
-            onPressed: () async {
-              User? user = await LocalStorageService.loadSavedUser();
-              print(user!.toJson());
-            },
-            child: Text("load"),
-          ),
-
-          TextButton(
-            onPressed: () async {
-              await LocalStorageService.removeSavedUser();
-            },
-            child: Text("clear"),
-          ),
-        ],
-      ),
+    // User cache test
+    return ListView(
+      children: [
+        TextButton(
+          onPressed: () async {
+            await LocalStorageService.saveUser(User("Dis Username", "Tokennn"));
+          },
+          child: Text("save"),
+        ),
+        TextButton(
+          onPressed: () async {
+            User? user = await LocalStorageService.loadSavedUser();
+            if (user != null) {
+              print(user.toJson());
+            } else {
+              print("No saved user");
+            }
+          },
+          child: Text("load"),
+        ),
+        TextButton(
+          onPressed: () async {
+            await LocalStorageService.removeSavedUser();
+          },
+          child: Text("clear"),
+        ),
+      ],
     );
   }
 
