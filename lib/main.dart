@@ -10,10 +10,12 @@ import 'models/user.dart';
 String baseUrl = "https://lift-log-prod.herokuapp.com/api";
 
 void main() {
-  runApp(EntryPoint());
+  runApp(const EntryPoint());
 }
 
 class EntryPoint extends StatelessWidget {
+  const EntryPoint({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
