@@ -47,3 +47,5 @@ app.*.map.json
 ios/build/Pods.build/Release-iphonesimulator/Flutter.build/dgph
 ios/build/Pods.build/Release-iphonesimulator/Pods-Runner.build/dgph
 ios/build/Pods.build/Release-iphonesimulator/shared_preferences.build/dgph
+
+.env

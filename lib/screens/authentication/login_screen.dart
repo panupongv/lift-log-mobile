@@ -1,8 +1,8 @@
-import 'package:dartz/dartz.dart' as dartz;
+import 'package:dartz/dartz.dart' as dz;
 import 'package:flutter/material.dart';
 import 'package:liftlogmobile/models/user.dart';
 import 'package:liftlogmobile/screens/authentication/signup_screen.dart';
-import 'package:liftlogmobile/services/data_service.dart';
+import 'package:liftlogmobile/services/api_service.dart';
 
 import 'auth_text_field.dart';
 
@@ -32,11 +32,10 @@ class _LoginScreenState extends State<LoginScreen> {
               obsecureText: true,
             ),
             TextButton(
-              child: Text("Go"),
+              child: const Text("Go"),
               onPressed: () async {
-                dartz.Either<User, String> loginResult =
-                    await DataService.login(
-                        _usernameController.text, _passwordController.text);
+                dz.Either<User, String> loginResult = await APIService.login(
+                    _usernameController.text, _passwordController.text);
                 if (loginResult.isLeft()) {
                   print(loginResult);
                 } else {
@@ -50,11 +49,18 @@ class _LoginScreenState extends State<LoginScreen> {
               onPressed: () async {
                 MaterialPageRoute signupPageRoute =
                     MaterialPageRoute(builder: (context) => SignUpScreen());
-                String message = await Navigator.push(
+                dynamic usernameAndPassword = await Navigator.push(
                   context,
                   signupPageRoute,
                 );
-                print("message from SIgnup Screen: $message");
+                print(
+                    "message from SIgnup Screen: ${usernameAndPassword.toString()}");
+                if (usernameAndPassword is List) {
+                  setState(() {
+                    _usernameController.text = usernameAndPassword[0];
+                    _passwordController.text = usernameAndPassword[1];
+                  });
+                }
               },
             )
           ],
