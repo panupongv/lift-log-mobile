@@ -1,8 +1,9 @@
 import 'package:dartz/dartz.dart' as dz;
-import 'package:flutter/material.dart';
-import 'package:liftlogmobile/screens/authentication/auth_text_field.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:liftlogmobile/widgets/auth_text_field.dart';
 import 'package:liftlogmobile/services/api_service.dart';
 import 'package:liftlogmobile/utils/auth_field_validator.dart';
+import 'package:liftlogmobile/widgets/quick_dialog.dart';
 
 class SignUpScreen extends StatefulWidget {
   @override
@@ -14,7 +15,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       _passwordController = TextEditingController(),
       _confirmPasswordController = TextEditingController();
 
-  Widget _submitButton(BuildContext context) => TextButton(
+  Widget _submitButton(BuildContext context) => CupertinoButton(
         child: const Text("Submit"),
         onPressed: () async {
           String username = _usernameController.text;
@@ -33,29 +34,22 @@ class _SignUpScreenState extends State<SignUpScreen> {
           }
 
           if (errorMessage != null) {
-            showDialog(
-              context: context,
-              builder: (BuildContext context) => AlertDialog(
-                content: Text(errorMessage!),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text("Dismiss"),
-                  ),
-                ],
-              ),
-            );
+            showCupertinoDialog(
+                context: context,
+                builder: (BuildContext context) => quickAlertDialog(
+                    context, "Signup Failed", errorMessage, "Dismiss"));
           } else {
             dz.Either<bool, String> signupResult =
                 await APIService.signup(username, password1);
             if (signupResult.isLeft()) {
-              showDialog(
+              showCupertinoDialog(
                 context: context,
-                builder: (BuildContext context) => AlertDialog(
-                  content: Text(
-                      signupResult.getOrElse(() => "User $username created!").toString()),
+                builder: (BuildContext context) => CupertinoAlertDialog(
+                  content: Text(signupResult
+                      .getOrElse(() => "User $username created!")
+                      .toString()),
                   actions: [
-                    TextButton(
+                    CupertinoButton(
                       onPressed: () {
                         Navigator.pop(context);
                         Navigator.pop(context, [username, password1]);
@@ -66,41 +60,36 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 ),
               );
             } else {
-              showDialog(
+              showCupertinoDialog(
                 context: context,
-                builder: (BuildContext context) => AlertDialog(
-                  content: Text(
-                      signupResult.getOrElse(() => "Signup Failed").toString()),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text("Dismiss"),
-                    ),
-                  ],
-                ),
+                builder: (BuildContext context) => quickAlertDialog(
+                    context,
+                    "Signup Failed",
+                    signupResult.getOrElse(() => "").toString(),
+                    "Dismiss"),
               );
             }
           }
         },
       );
 
-  Widget _cancelButton(BuildContext context) => TextButton(
+  Widget _cancelButton(BuildContext context) => CupertinoButton(
       child: const Text("Cancel"), onPressed: () => Navigator.pop(context));
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
+    return CupertinoPageScaffold(
+      child: Center(
         child: ListView(
           shrinkWrap: true,
           children: [
-            getAuthField("Username", _usernameController),
-            getAuthField(
+            authenticationTextField("Username", _usernameController),
+            authenticationTextField(
               "Password",
               _passwordController,
               obsecureText: true,
             ),
-            getAuthField(
+            authenticationTextField(
               "Confirm password",
               _confirmPasswordController,
               obsecureText: true,

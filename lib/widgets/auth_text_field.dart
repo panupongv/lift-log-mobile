@@ -1,25 +1,15 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 
-//class AuthTextField extends StatelessWidget {
-//  AuthTextField()
-
-//  @override
-//  Widget build(BuildContext context) {
-//    throw UnimplementedError();
-//  }
-
-//}
-
-Widget getAuthField(
+Widget authenticationTextField(
     String placeholder, TextEditingController textEditingController,
     {TextInputType inputType = TextInputType.text, bool obsecureText = false}) {
   return Padding(
     padding: const EdgeInsets.all(5),
-    child: TextField(
+    child: CupertinoTextField(
       controller: textEditingController,
       keyboardType: inputType,
       obscureText: obsecureText,
-      decoration: InputDecoration(hintText: placeholder),
+      placeholder: placeholder,
     ),
   );
 }

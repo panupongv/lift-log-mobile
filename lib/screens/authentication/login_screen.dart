@@ -1,10 +1,15 @@
 import 'package:dartz/dartz.dart' as dz;
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
+
+import 'package:liftlogmobile/lift_log_app.dart';
 import 'package:liftlogmobile/models/user.dart';
 import 'package:liftlogmobile/screens/authentication/signup_screen.dart';
 import 'package:liftlogmobile/services/api_service.dart';
+import 'package:liftlogmobile/services/local_storage_service.dart';
+import 'package:liftlogmobile/utils/auth_field_validator.dart';
+import 'package:liftlogmobile/widgets/quick_dialog.dart';
 
-import 'auth_text_field.dart';
+import '../../widgets/auth_text_field.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -17,44 +22,76 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
+    return CupertinoPageScaffold(
+      child: Center(
         child: ListView(
           shrinkWrap: true,
           children: [
-            getAuthField(
+            authenticationTextField(
               "Username",
               _usernameController,
             ),
-            getAuthField(
+            authenticationTextField(
               "Password",
               _passwordController,
               obsecureText: true,
             ),
-            TextButton(
-              child: const Text("Go"),
+            Container(
+              height: 20,
+            ),
+            CupertinoButton(
+              child: const Text("Login"),
               onPressed: () async {
-                dz.Either<User, String> loginResult = await APIService.login(
-                    _usernameController.text, _passwordController.text);
-                if (loginResult.isLeft()) {
-                  print(loginResult);
+                String username = _usernameController.text;
+                String password = _passwordController.text;
+
+                if (AuthFieldValidator.hasEmptyField([username, password])) {
+                  showCupertinoDialog(
+                    context: context,
+                    builder: (context) => quickAlertDialog(
+                      context,
+                      "Login Failed",
+                      "Please fill in all the fields.",
+                      "Dismiss",
+                    ),
+                  );
                 } else {
-                  print("Right");
-                  print(loginResult);
+                  dz.Either<User, String> loginResult =
+                      await APIService.login(username, password);
+                  loginResult.fold(
+                    (User user) {
+                      LocalStorageService.saveUser(user);
+                      CupertinoPageRoute mainAppRoute = CupertinoPageRoute(
+                          builder: (context) => LiftLogApp(user));
+                      Navigator.pushReplacement(context, mainAppRoute);
+                    },
+                    (String errorMessage) {
+                      showCupertinoDialog(
+                        context: context,
+                        builder: (context) => quickAlertDialog(
+                          context,
+                          "Login Failed",
+                          errorMessage,
+                          "Dismiss",
+                        ),
+                      );
+                    },
+                  );
                 }
               },
             ),
-            TextButton(
+            Container(
+              height: 50,
+            ),
+            CupertinoButton(
               child: Text("No account? Sign up here"),
               onPressed: () async {
-                MaterialPageRoute signupPageRoute =
-                    MaterialPageRoute(builder: (context) => SignUpScreen());
+                CupertinoPageRoute signupPageRoute =
+                    CupertinoPageRoute(builder: (context) => SignUpScreen());
                 dynamic usernameAndPassword = await Navigator.push(
                   context,
                   signupPageRoute,
                 );
-                print(
-                    "message from SIgnup Screen: ${usernameAndPassword.toString()}");
                 if (usernameAndPassword is List) {
                   setState(() {
                     _usernameController.text = usernameAndPassword[0];
