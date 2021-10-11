@@ -108,7 +108,19 @@ class _LiftLogAppState extends State<LiftLogApp> {
         },
       ),
       tabBuilder: (BuildContext context, int index) {
-        return _tabs[index];
+        return CupertinoTabView(
+          navigatorKey: () {
+            switch (index) {
+              case 0:
+                return navigatorKey0;
+              case 1:
+                return navigatorKey1;
+              case 2:
+                return navigatorKey2;
+            }
+          } (),
+          builder: (BuildContext context) => _tabs[index],
+        );
       },
     );
   }
