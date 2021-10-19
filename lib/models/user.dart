@@ -26,3 +26,7 @@ class User {
     );
   }
 }
+
+class GlobalUser {
+  static User? user;
+}

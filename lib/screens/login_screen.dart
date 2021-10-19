@@ -47,6 +47,7 @@ class _LoginScreenState extends State<LoginScreen> {
           await APIService.login(username, password);
       loginResult.fold(
         (User user) {
+          GlobalUser.user = user;
           LocalStorageService.saveUser(user);
           CupertinoPageRoute mainAppRoute =
               CupertinoPageRoute(builder: (context) => LiftLogApp(user));

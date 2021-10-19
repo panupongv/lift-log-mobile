@@ -1,7 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:liftlogmobile/screens/login_screen.dart';
+import 'package:liftlogmobile/services/api_service.dart';
 import 'package:liftlogmobile/services/local_storage_service.dart';
 
+import 'models/exercise.dart';
 import 'models/user.dart';
 import 'screens/overview_tab.dart';
 import 'screens/exercise_library_tab.dart';
@@ -11,6 +13,8 @@ class LiftLogApp extends StatefulWidget {
   final User _user;
   const LiftLogApp(this._user, {Key? key}) : super(key: key);
 
+  User get user => _user;
+
   // This widget is the root of your application.
   @override
   State<LiftLogApp> createState() => _LiftLogAppState(_user);
@@ -19,75 +23,55 @@ class LiftLogApp extends StatefulWidget {
 class _LiftLogAppState extends State<LiftLogApp> {
   User _user;
   int _currentIndex = 0;
+  List<Exercise> _exercises = [];
+  List<Widget> _tabs = [];
+
+  _LiftLogAppState(this._user);
+
+  @override
+  void initState() {
+    _reloadExerciseList();
+    //_tabs = [
+    //  OverviewTab(),
+    //  LogTab(),
+    //  ExerciseLibraryTab(_reloadExerciseList, _exercises),
+    //];
+  }
 
   GlobalKey<NavigatorState> navigatorKey0 =
           GlobalKey<NavigatorState>(debugLabel: 'key0'),
       navigatorKey1 = GlobalKey<NavigatorState>(debugLabel: 'key1'),
       navigatorKey2 = GlobalKey<NavigatorState>(debugLabel: 'key2');
 
-  _LiftLogAppState(this._user);
-
-  final List<Widget> _tabs = [
-    OverviewTab(),
-    LogTab(),
-    ExerciseLibraryTab(),
-  ];
-
-  Widget _build(BuildContext context) {
-    return ListView(
-      children: [
-        CupertinoButton(
-          onPressed: () async {
-            await LocalStorageService.saveUser(User("Dis Username", "Tokennn"));
-          },
-          child: Text("save"),
-        ),
-        CupertinoButton(
-          onPressed: () async {
-            User? user = await LocalStorageService.loadSavedUser();
-            if (user != null) {
-              print(user.toJson());
-            } else {
-              print("No saved user");
-            }
-          },
-          child: Text("load"),
-        ),
-        CupertinoButton(
-          onPressed: () async {
-            await LocalStorageService.removeSavedUser();
-          },
-          child: Text("clear"),
-        ),
-        CupertinoButton(
-          onPressed: () async {
-            await LocalStorageService.removeSavedUser();
-            CupertinoPageRoute backToLoginRoute =
-                CupertinoPageRoute(builder: (context) => LoginScreen());
-            Navigator.pushReplacement(context, backToLoginRoute);
-          },
-          child: Text("Logout"),
-        ),
-      ],
-    );
+  void _reloadExerciseList() async {
+    List<Exercise> updatedExercises = await APIService.getExercises(_user);
+    setState(() {
+      _exercises = updatedExercises;
+    });
+    //APIService.getExercises(_user).then((updatedExercises) {
+    //  print(updatedExercises);
+    //  setState(() {
+    //    _exercises = updatedExercises;
+    //  });
+    //});
   }
 
   @override
   Widget build(BuildContext context) {
     return CupertinoTabScaffold(
       tabBar: CupertinoTabBar(
-        items: [
-          const BottomNavigationBarItem(
+        items: const [
+          BottomNavigationBarItem(
             icon: Icon(CupertinoIcons.calendar),
             label: "Overview",
           ),
-          const BottomNavigationBarItem(
+          BottomNavigationBarItem(
             icon: Icon(CupertinoIcons.list_bullet),
             label: "Log",
           ),
-          const BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.gear),
-            label: "Exercises",
+          BottomNavigationBarItem(
+            icon: Icon(CupertinoIcons.person),
+            label: "Profile",
           ),
         ],
         onTap: (int index) {
@@ -118,8 +102,20 @@ class _LiftLogAppState extends State<LiftLogApp> {
               case 2:
                 return navigatorKey2;
             }
-          } (),
-          builder: (BuildContext context) => _tabs[index],
+          }(),
+          //builder: (BuildContext context) => _tabs[index],
+          builder: (BuildContext context) {
+            switch (index) {
+              case 0:
+                return OverviewTab();
+              case 1:
+                return LogTab();
+              case 2:
+                return ExerciseLibraryTab(_reloadExerciseList, _exercises);
+              default:
+                return const Text("Tab Unavailable");
+            }
+          },
         );
       },
     );
