@@ -65,8 +65,7 @@ class ExerciseLibraryTab extends StatelessWidget {
         top: true,
         child: ListView(
           children: _exercises.map((ex) {
-            return ExerciseListItem(ex.id, ex.name);
-            //return Card(child: ListTile(title: Text(e.name),),);            
+            return ExerciseListItem(ex, _reloadExercises);
           }).toList(),
         ),
       ),

@@ -50,7 +50,7 @@ class _LoginScreenState extends State<LoginScreen> {
           GlobalUser.user = user;
           LocalStorageService.saveUser(user);
           CupertinoPageRoute mainAppRoute =
-              CupertinoPageRoute(builder: (context) => LiftLogApp(user));
+              CupertinoPageRoute(builder: (context) => LiftLogApp());
           Navigator.pushReplacement(context, mainAppRoute);
         },
         (String errorMessage) {

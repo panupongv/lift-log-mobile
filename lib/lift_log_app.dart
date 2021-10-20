@@ -10,23 +10,18 @@ import 'screens/exercise_library_tab.dart';
 import 'screens/log_tab.dart';
 
 class LiftLogApp extends StatefulWidget {
-  final User _user;
-  const LiftLogApp(this._user, {Key? key}) : super(key: key);
-
-  User get user => _user;
 
   // This widget is the root of your application.
   @override
-  State<LiftLogApp> createState() => _LiftLogAppState(_user);
+  State<LiftLogApp> createState() => _LiftLogAppState();
 }
 
 class _LiftLogAppState extends State<LiftLogApp> {
-  User _user;
   int _currentIndex = 0;
   List<Exercise> _exercises = [];
   List<Widget> _tabs = [];
 
-  _LiftLogAppState(this._user);
+  _LiftLogAppState();
 
   @override
   void initState() {
@@ -44,17 +39,11 @@ class _LiftLogAppState extends State<LiftLogApp> {
       navigatorKey2 = GlobalKey<NavigatorState>(debugLabel: 'key2');
 
   void _reloadExerciseList() async {
-    List<Exercise> updatedExercises = await APIService.getExercises(_user);
+    List<Exercise> updatedExercises = await APIService.getExercises(GlobalUser.user!);
     setState(() {
       _exercises = updatedExercises;
     });
-    //APIService.getExercises(_user).then((updatedExercises) {
-    //  print(updatedExercises);
-    //  setState(() {
-    //    _exercises = updatedExercises;
-    //  });
-    //});
-  }
+   }
 
   @override
   Widget build(BuildContext context) {

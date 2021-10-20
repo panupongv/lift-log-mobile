@@ -21,7 +21,8 @@ class EntryPoint extends StatelessWidget {
         future: LocalStorageService.loadSavedUser(),
         builder: (BuildContext context, AsyncSnapshot<User?> currentUser) {
           if (currentUser.data != null) {
-            return LiftLogApp(currentUser.data!);
+            GlobalUser.user = currentUser.data!;
+            return LiftLogApp();
           } else {
             return LoginScreen();
           }

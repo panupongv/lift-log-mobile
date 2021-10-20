@@ -65,14 +65,33 @@ class APIService {
     final Uri url = Uri.parse("$host/${user.username}/exercises");
     Response response = await get(url, headers: jsonHeaderWithAuthToken(user));
 
-    print(response);
-    print(response.body);
     if (response.statusCode == 200) {
       dynamic json = jsonDecode(response.body);
       List<dynamic> rawExercises = json['exercises'];
       return rawExercises.map((e) => Exercise.fromJson(e)).toList();
-      //return [];
     } 
+    return [];
+  }
+
+  static Future<List<Exercise>> updateExercise(User user, Exercise exercise, String newName) async {
+    final Uri url = Uri.parse("$host/${user.username}/exercises/${exercise.id}");
+    Response response = await put(
+      url,
+      headers: jsonHeaderWithAuthToken(user),
+      body: jsonEncode(<String, String>{
+        'exerciseName': newName 
+      }),
+    );
+
+    print(response);
+    print(response.statusCode);
+    print(response.body);
+
+    if (response.statusCode == 200) {
+      dynamic json = jsonDecode(response.body);
+      print("Updated: " + json.toString());
+      return [];
+    }
     return [];
   }
 }
