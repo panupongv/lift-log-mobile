@@ -11,7 +11,7 @@ class _EditExerciseDialog extends StatelessWidget {
   Exercise _exercise;
   Function _reloadExercises;
   TextEditingController _exerciseNameController = new TextEditingController();
-  
+
   _EditExerciseDialog(this._exercise, this._reloadExercises) {
     _exerciseNameController.text = _exercise.name;
   }
@@ -40,9 +40,53 @@ class _EditExerciseDialog extends StatelessWidget {
           ),
           onPressed: () async {
             String newName = _exerciseNameController.text;
-            await APIService.updateExercise(GlobalUser.user!, _exercise, newName);
-            _reloadExercises();
+            bool updated = await APIService.updateExercise(
+                GlobalUser.user!, _exercise, newName);
+            if (updated) {
+              _reloadExercises();
+              Navigator.pop(context);
+              Navigator.pop(context);
+            }
+          },
+        )
+      ],
+    );
+  }
+}
+
+class _DeleteExerciseDialog extends StatelessWidget {
+  Exercise _exercise;
+  Function _reloadExercises;
+  _DeleteExerciseDialog(this._exercise, this._reloadExercises);
+
+  @override
+  Widget build(BuildContext context) {
+    return CupertinoAlertDialog(
+      title: Text("Delete Exercise"),
+      content: Text("Are you sure?"),
+      actions: <Widget>[
+        CupertinoDialogAction(
+          child: Text(
+            "Cancel",
+            //style: Styles.dialogActionNormal(context),
+          ),
+          onPressed: () {
             Navigator.pop(context);
+          },
+        ),
+        CupertinoDialogAction(
+          child: Text(
+            "Delete",
+            //style: Styles.dialogActionNormal(context),
+          ),
+          onPressed: () async {
+            bool deleted =
+                await APIService.deleteExercises(GlobalUser.user!, _exercise);
+            if (deleted) {
+              _reloadExercises();
+              Navigator.pop(context);
+              Navigator.pop(context);
+            }
           },
         )
       ],
@@ -77,35 +121,78 @@ class ExerciseListItem extends StatelessWidget {
               padding: EdgeInsets.only(left: 10, top: 10, bottom: 10),
               child: Text(_exercise.name),
             ),
-            CupertinoContextMenu(
-              child: Padding(
-                padding: EdgeInsets.only(right: 10, top: 10, bottom: 10),
+            Padding(
+              padding: const EdgeInsets.only(right: 10, top: 10, bottom: 10),
+              child: GestureDetector(
                 child: Icon(CupertinoIcons.ellipsis),
+                onTap: () async {
+                  await showCupertinoModalPopup(
+                    context: context,
+                    builder: (BuildContext buildContext) {
+                      return CupertinoActionSheet(
+                        actions: [
+                          CupertinoActionSheetAction(
+                            onPressed: () {
+                              showCupertinoDialog(
+                                context: context,
+                                builder: (BuildContext buildContext) {
+                                  return _EditExerciseDialog(
+                                      _exercise, _reloadExercises);
+                                },
+                              );
+                            },
+                            child: const Text("Edit"),
+                          ),
+                          CupertinoActionSheetAction(
+                            onPressed: () {
+                              showCupertinoDialog(
+                                context: context,
+                                builder: (BuildContext buildContext) {
+                                  return _DeleteExerciseDialog(
+                                      _exercise, _reloadExercises);
+                                },
+                              );
+                            },
+                            child: const Text("Delete"),
+                          ),
+                        ],
+                        cancelButton: CupertinoActionSheetAction(
+                          child: Text(
+                            "Cancel",
+                          ),
+                          onPressed: () {
+                            Navigator.of(buildContext).pop();
+                          },
+                        ),
+                      );
+                    },
+                  );
+                },
               ),
-              actions: [
-                CupertinoContextMenuAction(
-                  child: Text("Edit"),
-                  onPressed: () {
-                    //Navigator.pop(context);
-                    showCupertinoDialog(
-                        context: context,
-                        builder: (BuildContext buildContext) {
-                          return _EditExerciseDialog(_exercise, _reloadExercises);
-                        });
-                  },
-                ),
-                CupertinoContextMenuAction(
-                  child: Text("Delete"),
-                  onPressed: () {},
-                ),
-              ],
             ),
-            //Padding(
-            //  padding: EdgeInsets.only(right: 10, top: 10, bottom: 10),
-            //  child: GestureDetector(
+
+            //CupertinoContextMenu(
+            //  child: Padding(
+            //    padding: EdgeInsets.only(right: 10, top: 10, bottom: 10),
             //    child: Icon(CupertinoIcons.ellipsis),
-            //    onTap: () {},
             //  ),
+            //  actions: [
+            //    CupertinoContextMenuAction(
+            //      child: Text("Edit"),
+            //      onPressed: () {
+            //        //Navigator.pop(context);
+            //        showCupertinoDialog(
+            //            context: context,
+            //            builder: (BuildContext buildContext) {
+            //              return _EditExerciseDialog(_exercise, _reloadExercises);
+            //            });
+            //      },
+            //    ),
+            //    CupertinoContextMenuAction(
+            //      child: Text("Delete"),
+            //      onPressed: () {},
+            //    ),
+            //  ],
             //),
           ],
         ),

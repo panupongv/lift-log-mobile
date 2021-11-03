@@ -34,7 +34,7 @@ class APIService {
     );
 
     Map<String, dynamic> responseBody = jsonDecode(response.body);
-    if (response.statusCode == 200) {
+    if (response.statusCode == HttpStatus.ok) {
       return Left(User(username, responseBody['token']));
     } else {
       return Right(responseBody['message']);
@@ -65,7 +65,7 @@ class APIService {
     final Uri url = Uri.parse("$host/${user.username}/exercises");
     Response response = await get(url, headers: jsonHeaderWithAuthToken(user));
 
-    if (response.statusCode == 200) {
+    if (response.statusCode == HttpStatus.ok) {
       dynamic json = jsonDecode(response.body);
       List<dynamic> rawExercises = json['exercises'];
       return rawExercises.map((e) => Exercise.fromJson(e)).toList();
@@ -73,7 +73,7 @@ class APIService {
     return [];
   }
 
-  static Future<List<Exercise>> updateExercise(User user, Exercise exercise, String newName) async {
+  static Future<bool> updateExercise(User user, Exercise exercise, String newName) async {
     final Uri url = Uri.parse("$host/${user.username}/exercises/${exercise.id}");
     Response response = await put(
       url,
@@ -83,15 +83,22 @@ class APIService {
       }),
     );
 
-    print(response);
-    print(response.statusCode);
-    print(response.body);
-
-    if (response.statusCode == 200) {
-      dynamic json = jsonDecode(response.body);
-      print("Updated: " + json.toString());
-      return [];
+    if (response.statusCode == HttpStatus.ok) {
+      return true;
     }
-    return [];
+    return false;
+  }
+
+  static Future<bool> deleteExercises(User user, Exercise exercise) async {
+    final Uri url = Uri.parse("$host/${user.username}/exercises/${exercise.id}");
+    Response response = await delete(
+      url,
+      headers: jsonHeaderWithAuthToken(user),
+    );
+
+    if (response.statusCode == HttpStatus.ok) {
+      return true;
+    }
+    return false;
   }
 }
