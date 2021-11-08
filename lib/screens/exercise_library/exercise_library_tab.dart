@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:liftlogmobile/lift_log_app.dart';
 import 'package:liftlogmobile/models/exercise.dart';
 import 'package:liftlogmobile/models/user.dart';
-import 'package:liftlogmobile/screens/login_screen.dart';
+import 'package:liftlogmobile/screens/auth/login_screen.dart';
 import 'package:liftlogmobile/services/local_storage_service.dart';
+import 'package:liftlogmobile/widgets/add_exercise_item.dart';
 import 'package:liftlogmobile/widgets/exercise_list_item.dart';
 import 'package:liftlogmobile/widgets/navigation_bar_text.dart';
 
@@ -44,7 +45,7 @@ class ExerciseLibraryTab extends StatelessWidget {
                         CupertinoPageRoute(builder: (context) => LoginScreen());
                     Navigator.pushReplacement(context, backToLoginRoute);
                   },
-                )
+                ),
               ],
             );
           },
@@ -64,9 +65,10 @@ class ExerciseLibraryTab extends StatelessWidget {
       child: SafeArea(
         top: true,
         child: ListView(
-          children: _exercises.map((ex) {
-            return ExerciseListItem(ex, _reloadExercises);
-          }).toList(),
+          children: <Widget>[AddExerciseItem(_reloadExercises)] +
+              _exercises
+                  .map((ex) => ExerciseListItem(ex, _reloadExercises))
+                  .toList(),
         ),
       ),
     );

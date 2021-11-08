@@ -20,8 +20,15 @@ class _EditExerciseDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return CupertinoAlertDialog(
       title: Text("Edit Exercise Name"),
-      content: CupertinoTextField(
-        controller: _exerciseNameController,
+      content: Column(
+        children: [
+          Container(
+            height: 10,
+          ),
+          CupertinoTextField(
+            controller: _exerciseNameController,
+          )
+        ],
       ),
       actions: <Widget>[
         CupertinoDialogAction(
@@ -95,10 +102,6 @@ class _DeleteExerciseDialog extends StatelessWidget {
 }
 
 class ExerciseListItem extends StatelessWidget {
-  //String _exerciseId, _exerciseName;
-
-  //ExerciseListItem(this._exerciseId, this._exerciseName);
-
   Exercise _exercise;
   Function _reloadExercises;
 

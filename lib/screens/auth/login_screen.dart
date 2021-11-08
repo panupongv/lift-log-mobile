@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 import 'package:liftlogmobile/lift_log_app.dart';
 import 'package:liftlogmobile/models/user.dart';
-import 'package:liftlogmobile/screens/signup_screen.dart';
+import 'package:liftlogmobile/screens/auth/signup_screen.dart';
 import 'package:liftlogmobile/services/api_service.dart';
 import 'package:liftlogmobile/services/local_storage_service.dart';
 import 'package:liftlogmobile/utils/auth_field_validator.dart';
