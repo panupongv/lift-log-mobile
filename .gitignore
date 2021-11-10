@@ -49,4 +49,3 @@ ios/build/Pods.build/Release-iphonesimulator/Pods-Runner.build/dgph
 ios/build/Pods.build/Release-iphonesimulator/shared_preferences.build/dgph
 
 .env
-.metals/metals.lock.db
