@@ -9,11 +9,49 @@ import 'package:liftlogmobile/widgets/add_exercise_item.dart';
 import 'package:liftlogmobile/widgets/exercise_list_item.dart';
 import 'package:liftlogmobile/widgets/navigation_bar_text.dart';
 
-class ExerciseLibraryTab extends StatelessWidget {
+class ExerciseLibraryTab extends StatefulWidget {
   Function _reloadExercises;
   List<Exercise> _exercises;
 
   ExerciseLibraryTab(this._reloadExercises, this._exercises);
+
+  @override
+  State<ExerciseLibraryTab> createState() => _ExerciseLibraryTabState();
+}
+
+class _ExerciseLibraryTabState extends State<ExerciseLibraryTab> {
+  bool _showSearch = false;
+  String _searchText = "";
+  TextEditingController _searchTextController = TextEditingController();
+  FocusNode _focusNode = FocusNode();
+
+  Widget _navigationBarLeadingWidget() {
+    return _showSearch
+        ? Container(width: 0)
+        : GestureDetector(
+            child: Icon(CupertinoIcons.search),
+            onTap: () {
+              setState(() {
+                _showSearch = true;
+                _focusNode.requestFocus();
+              });
+            },
+          );
+  }
+
+  Widget _navigationBarMiddleWidget() {
+    return _showSearch
+        ? CupertinoSearchTextField(
+            focusNode: _focusNode,
+            controller: _searchTextController,
+            onChanged: (String searchText) {
+              setState(() {
+                _searchText = searchText;
+              });
+            },
+          )
+        : navigationBarTitle(context, "My Exercises");
+  }
 
   Widget _logoutButton(BuildContext context) {
     return navigationBarTextButton(
@@ -54,20 +92,40 @@ class ExerciseLibraryTab extends StatelessWidget {
     );
   }
 
+  Widget _navigationBarTrailingWidget() {
+    return _showSearch
+        ? Padding(
+            padding: EdgeInsets.only(left: 8),
+            child: navigationBarTextButton(context, "Cancel", () {
+              setState(() {
+                _focusNode.unfocus();
+                _searchTextController.clear();
+                _searchText = "";
+                _showSearch = false;
+              });
+            }),
+          )
+        : _logoutButton(context);
+  }
+
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         automaticallyImplyLeading: false,
-        middle: Text("My Exercises"),
-        trailing: _logoutButton(context),
+        leading: _navigationBarLeadingWidget(),
+        middle: _navigationBarMiddleWidget(),
+        trailing: _navigationBarTrailingWidget(),
       ),
       child: SafeArea(
         top: true,
         child: ListView(
-          children: <Widget>[AddExerciseItem(_reloadExercises)] +
-              _exercises
-                  .map((ex) => ExerciseListItem(ex, _reloadExercises))
+          children: <Widget>[AddExerciseItem(widget._reloadExercises)] +
+              widget._exercises
+                  .where((Exercise element) {
+                    return element.name.toLowerCase().contains(_searchText);
+                  })
+                  .map((ex) => ExerciseListItem(ex, widget._reloadExercises))
                   .toList(),
         ),
       ),
