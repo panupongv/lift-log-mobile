@@ -22,6 +22,7 @@ class EntryPoint extends StatelessWidget {
         builder: (BuildContext context, AsyncSnapshot<User?> currentUser) {
           if (currentUser.data != null) {
             GlobalUser.user = currentUser.data!;
+            print("Logging in as ${GlobalUser.user!.username}");
             return LiftLogApp();
           } else {
             return LoginScreen();

@@ -26,11 +26,6 @@ class _LiftLogAppState extends State<LiftLogApp> {
   @override
   void initState() {
     _reloadExerciseList();
-    //_tabs = [
-    //  OverviewTab(),
-    //  LogTab(),
-    //  ExerciseLibraryTab(_reloadExerciseList, _exercises),
-    //];
   }
 
   GlobalKey<NavigatorState> navigatorKey0 =
@@ -39,7 +34,7 @@ class _LiftLogAppState extends State<LiftLogApp> {
       navigatorKey2 = GlobalKey<NavigatorState>(debugLabel: 'key2');
 
   void _reloadExerciseList() async {
-    List<Exercise> updatedExercises = await APIService.getExercises(GlobalUser.user!);
+    List<Exercise> updatedExercises = await APIService.getExercises();
     setState(() {
       _exercises = updatedExercises;
     });
