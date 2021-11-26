@@ -18,7 +18,9 @@ class SessionListItem extends StatefulWidget {
 class _SessionListItemState extends State<SessionListItem> {
   Widget _deleteSessionDialog(
       BuildContext context, Session session, Function _reloadSessions) {
+
     bool deleting = false;
+
     return CupertinoAlertDialog(
       title: const Text("Delete Session"),
       content: const Text("Are you sure?"),
@@ -30,17 +32,21 @@ class _SessionListItemState extends State<SessionListItem> {
           },
         ),
         CupertinoDialogAction(
-          child: const Text("Delete"),
+          child: Text("Delete", style: Styles.cautiousDialogAction(context, !deleting)),
           onPressed: () async {
             if (!deleting) {
-              deleting = true;
+              setState(() {
+                deleting = true;  
+              });
               bool deleted = await APIService.deleteSession(widget._session);
               if (deleted) {
                 _reloadSessions(reset: true);
                 Navigator.pop(context);
                 Navigator.pop(context);
               }
-              deleting = false;
+              setState(() {
+                deleting = false;  
+              });
             }
           },
         ),

@@ -19,8 +19,11 @@ abstract class Styles {
         CupertinoColors.inactiveGray.darkColor,
       );
 
-  static Color activeColor = CupertinoColors.activeBlue;
-  static Color inactiveColor = CupertinoColors.inactiveGray;
+  static Color activeColor(context) => _dynamicColor(context, CupertinoColors.activeBlue.color, CupertinoColors.activeBlue.darkColor);
+  static Color inactiveColor(context) => _dynamicGrey(context);
+
+  static Color cautiousActionColor(context) => _dynamicColor(context,
+      CupertinoColors.systemRed.color, CupertinoColors.systemRed.darkColor);
 
   static Color iconGrey(context) => _dynamicGrey(context);
 
@@ -46,7 +49,7 @@ abstract class Styles {
 
   static TextStyle navigationBarTextActive(context) => TextStyle(
         fontFamily: 'SFPro',
-        color: activeColor,
+        color: activeColor(context),
         fontSize: 17,
       );
 
@@ -55,6 +58,10 @@ abstract class Styles {
         color: _dynamicGrey(context),
         fontSize: 17,
       );
+
+  static TextStyle cautiousDialogAction(context, isActive) => TextStyle(
+    color: isActive? cautiousActionColor(context) : _dynamicGrey(context)
+  );
 
   static TextStyle sessionListItemHeader(context) => TextStyle(
       fontFamily: _defaultFontFamily,
