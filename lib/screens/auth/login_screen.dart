@@ -96,9 +96,11 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             UnconstrainedBox(
               child: CupertinoButton.filled(
-                disabledColor: Styles.disabledAuthButton(),
+                disabledColor: Styles.disabledAuthButton(context),
                 borderRadius: const BorderRadius.all(Radius.circular(8)),
-                child: _buttonAvailable ? const Text("Login") : const Text("Processing"),
+                child: _buttonAvailable
+                    ? const Text("Login")
+                    : const Text("Processing"),
                 onPressed: _buttonAvailable ? _submitLogin : null,
               ),
             ),

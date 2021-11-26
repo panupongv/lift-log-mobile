@@ -80,10 +80,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   Widget _submitButton(BuildContext context) => UnconstrainedBox(
         child: CupertinoButton.filled(
-          disabledColor: Styles.disabledAuthButton(),
+          disabledColor: Styles.disabledAuthButton(context),
           borderRadius: const BorderRadius.all(Radius.circular(8)),
-          child: _buttonAvailable? const Text("Submit"):const Text("Processing"),
-          onPressed: _buttonAvailable? _submitSignup:null,
+          child: _buttonAvailable
+              ? const Text("Submit")
+              : const Text("Processing"),
+          onPressed: _buttonAvailable ? _submitSignup : null,
         ),
       );
 

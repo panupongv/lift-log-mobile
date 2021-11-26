@@ -17,6 +17,7 @@ class EntryPoint extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CupertinoApp(
+      debugShowCheckedModeBanner: false,
       home: FutureBuilder(
         future: LocalStorageService.loadSavedUser(),
         builder: (BuildContext context, AsyncSnapshot<User?> currentUser) {

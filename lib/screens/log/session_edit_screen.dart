@@ -15,6 +15,8 @@ class SessionEditScreen extends StatefulWidget {
 }
 
 class _SessionEditScreenState extends State<SessionEditScreen> {
+  bool _saving = false;
+
   DateTime _selectedDate = DateTime.now();
   final TextEditingController _nameController = new TextEditingController();
   final TextEditingController _locationController = new TextEditingController();
@@ -32,62 +34,75 @@ class _SessionEditScreenState extends State<SessionEditScreen> {
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
-        automaticallyImplyLeading: false,
-        leading: navigationBarTextButton(context, "Cancel", () {
-          Navigator.pop(context);
-        }),
+        automaticallyImplyLeading: true,
         middle: navigationBarTitle(context, "New Session"),
-        trailing: navigationBarTextButton(context, "Save", () async {
-          if (_nameController.text == "") {
-            await showCupertinoDialog(
-              context: context,
-              builder: (BuildContext buildContext) => quickAlertDialog(
-                  buildContext,
-                  "Error Saving",
-                  "Please enter a valid session name.",
-                  "Dismiss"),
-            );
-            return;
-          }
+        trailing: navigationBarTextButton(
+          context,
+          "Save",
+          () async {
+            if (_nameController.text == "") {
+              await showCupertinoDialog(
+                context: context,
+                builder: (BuildContext buildContext) => quickAlertDialog(
+                    buildContext,
+                    "Error Saving",
+                    "Please enter a valid session name.",
+                    "Dismiss"),
+              );
+              return;
+            }
 
-          if (widget._session == null) {
-            Session sessionToCreate = Session("", _nameController.text,
-                _selectedDate, _locationController.text);
-            Session? createdSession =
-                await APIService.createSession(sessionToCreate);
-            if (createdSession != null) {
-              Navigator.pop(context, createdSession);
+            setState(() {
+              _saving = true;
+            });
+
+            if (widget._session == null) {
+              Session sessionToCreate = Session("", _nameController.text,
+                  _selectedDate, _locationController.text);
+              Session? createdSession =
+                  await APIService.createSession(sessionToCreate);
+              if (createdSession != null) {
+                Navigator.pop(context, createdSession);
+              } else {
+                showCupertinoDialog(
+                    context: context,
+                    builder: (buildContext) => quickAlertDialog(
+                        buildContext,
+                        "Error Saving",
+                        "Failed to create the session.",
+                        "Dismiss"));
+              }
             } else {
-              showCupertinoDialog(
-                  context: context,
-                  builder: (buildContext) => quickAlertDialog(
-                      buildContext,
-                      "Error Saving",
-                      "Failed to create the session.",
-                      "Dismiss"));
+              Session updatedSession = Session(
+                  widget._session!.id,
+                  _nameController.text,
+                  _selectedDate,
+                  _locationController.text);
+              bool isUpdateSuccessful =
+                  await APIService.updateSession(updatedSession);
+              if (isUpdateSuccessful) {
+                Navigator.pop(context, updatedSession);
+              } else {
+                showCupertinoDialog(
+                    context: context,
+                    builder: (buildContext) => quickAlertDialog(
+                        buildContext,
+                        "Error Saving",
+                        "Unable to update the session.",
+                        "Dismiss"));
+              }
             }
-          } else {
-            Session updatedSession = Session(widget._session!.id,
-                _nameController.text, _selectedDate, _locationController.text);
-            bool isUpdateSuccessful =
-                await APIService.updateSession(updatedSession);
-            if (isUpdateSuccessful) {
-              Navigator.pop(context, updatedSession);
-            } else {
-              showCupertinoDialog(
-                  context: context,
-                  builder: (buildContext) => quickAlertDialog(
-                      buildContext,
-                      "Error Saving",
-                      "Unable to update the session.",
-                      "Dismiss"));
-            }
-          }
-        }),
+
+            setState(() {
+              _saving = false;
+            });
+          },
+          isActive: !_saving,
+        ),
       ),
       child: SafeArea(
         top: true,
-        child: Column(
+        child: ListView(
           children: [
             Text("New Page"),
             CupertinoTextField(

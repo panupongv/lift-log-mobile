@@ -10,6 +10,7 @@ import 'package:liftlogmobile/services/api_service.dart';
 import 'package:liftlogmobile/services/local_storage_service.dart';
 import 'package:liftlogmobile/screens/exercise_library/add_exercise_item.dart';
 import 'package:liftlogmobile/screens/exercise_library/exercise_list_item.dart';
+import 'package:liftlogmobile/utils/styles.dart';
 import 'package:liftlogmobile/widgets/navigation_bar_text.dart';
 import 'package:liftlogmobile/screens/log/session_list_item.dart';
 
@@ -52,8 +53,7 @@ class _LogTabState extends State<LogTab> {
       if (reset) {
         _sessions = loadedSessions;
       } else {
-        List<Session> concatenated = _sessions + loadedSessions;
-        _sessions = concatenated;
+        _sessions += loadedSessions;
       }
     });
 
@@ -115,14 +115,17 @@ class _LogTabState extends State<LogTab> {
       ),
       child: SafeArea(
         top: true,
-        child: ListView(
-          controller: _scrollController,
-          children: <Widget>[] +
-              _sessions
-                  .map((Session session) =>
-                      SessionListItem(session, _loadSessions))
-                  .toList() +
-              <Widget>[_loadMoreButton()],
+        child: Container(
+          color: Styles.defaultBackground(context),
+          child: ListView(
+            controller: _scrollController,
+            children: <Widget>[] +
+                _sessions
+                    .map((Session session) =>
+                        SessionListItem(session, _loadSessions))
+                    .toList() +
+                <Widget>[_loadMoreButton()],
+          ),
         ),
       ),
     );

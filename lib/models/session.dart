@@ -53,6 +53,10 @@ class Session {
     return _displayDateFormat.format(_date);
   }
 
+  String getDayOfWeek() {
+    return DateFormat("EEEE").format(_date);
+  }
+
   String getDateInDatabaseFormat() {
     return "${_databaseDateFormat.format(_date.toUtc())}Z";
   }

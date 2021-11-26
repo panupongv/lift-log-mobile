@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:liftlogmobile/models/session.dart';
 import 'package:liftlogmobile/screens/log/session_edit_screen.dart';
 import 'package:liftlogmobile/services/api_service.dart';
+import 'package:liftlogmobile/utils/styles.dart';
 
 class SessionListItem extends StatefulWidget {
-  Session _session;
-  Function _reloadSessions;
+  final Session _session;
+  final Function _reloadSessions;
 
   SessionListItem(this._session, this._reloadSessions);
 
@@ -17,24 +18,29 @@ class SessionListItem extends StatefulWidget {
 class _SessionListItemState extends State<SessionListItem> {
   Widget _deleteSessionDialog(
       BuildContext context, Session session, Function _reloadSessions) {
+    bool deleting = false;
     return CupertinoAlertDialog(
-      title: Text("Delete Session"),
-      content: Text("Are you sure?"),
+      title: const Text("Delete Session"),
+      content: const Text("Are you sure?"),
       actions: [
         CupertinoDialogAction(
-          child: Text("Cancel"),
+          child: const Text("Cancel"),
           onPressed: () {
             Navigator.pop(context);
           },
         ),
         CupertinoDialogAction(
-          child: Text("Delete"),
+          child: const Text("Delete"),
           onPressed: () async {
-            bool deleted = await APIService.deleteSession(widget._session);
-            if (deleted) {
-              _reloadSessions(reset: true);
-              Navigator.pop(context);
-              Navigator.pop(context);
+            if (!deleting) {
+              deleting = true;
+              bool deleted = await APIService.deleteSession(widget._session);
+              if (deleted) {
+                _reloadSessions(reset: true);
+                Navigator.pop(context);
+                Navigator.pop(context);
+              }
+              deleting = false;
             }
           },
         ),
@@ -45,11 +51,11 @@ class _SessionListItemState extends State<SessionListItem> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.all(10),
+      padding: const EdgeInsets.only(top: 15, left: 15, right: 15),
       child: Container(
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.greenAccent),
-          borderRadius: BorderRadius.all(Radius.circular(8)),
+          color: Styles.listItemBackground(context),
+          borderRadius: const BorderRadius.all(Radius.circular(8)),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -58,23 +64,51 @@ class _SessionListItemState extends State<SessionListItem> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Padding(
-                  padding: EdgeInsets.only(left: 10, top: 10, bottom: 10),
-                  child: Text(widget._session.name),
+                  padding: const EdgeInsets.only(left: 15, top: 10, bottom: 5),
+                  child: Text(widget._session.name,
+                      style: Styles.sessionListItemHeader(context)),
                 ),
                 Padding(
-                  padding: EdgeInsets.only(left: 10, top: 10, bottom: 10),
-                  child: Text(widget._session.getDateInDisplayFormat()),
-                ),
-                Padding(
-                  padding: EdgeInsets.only(left: 10, top: 10, bottom: 10),
-                  child: Text(widget._session.location),
+                  padding: const EdgeInsets.only(left: 15, bottom: 10),
+                  child: Row(
+                    children: [
+                          Icon(CupertinoIcons.calendar,
+                              color: Styles.iconGrey(context)),
+                          Container(width: 5),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                widget._session.getDayOfWeek(),
+                                style: Styles.sessionListItemDetails(context),
+                              ),
+                              Text(
+                                widget._session.getDateInDisplayFormat(),
+                                style: Styles.sessionListItemDetails(context),
+                              ),
+                            ],
+                          ),
+                          Container(width: 15),
+                        ] +
+                        (widget._session.location != ""
+                            ? [
+                                Icon(CupertinoIcons.location,
+                                    color: Styles.iconGrey(context)),
+                                Container(width: 5),
+                                Text(
+                                  widget._session.location,
+                                  style: Styles.sessionListItemDetails(context),
+                                ),
+                              ]
+                            : []),
+                  ),
                 ),
               ],
             ),
             Padding(
               padding: const EdgeInsets.only(right: 10, top: 10, bottom: 10),
               child: GestureDetector(
-                child: Icon(CupertinoIcons.ellipsis),
+                child: Icon(CupertinoIcons.ellipsis, color: Styles.ellipsisIcon(context),),
                 onTap: () async {
                   await showCupertinoModalPopup(
                     context: context,
@@ -114,7 +148,7 @@ class _SessionListItemState extends State<SessionListItem> {
                           ),
                         ],
                         cancelButton: CupertinoActionSheetAction(
-                          child: Text(
+                          child: const Text(
                             "Cancel",
                           ),
                           onPressed: () {
