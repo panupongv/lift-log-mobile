@@ -4,13 +4,15 @@ import 'dart:io';
 import 'package:dartz/dartz.dart';
 import 'package:http/http.dart';
 import 'package:liftlogmobile/models/exercise.dart';
+import 'package:liftlogmobile/models/session.dart';
 import 'package:liftlogmobile/models/user.dart';
 
 class APIService {
-  static const String host = "https://lift-log-prod.herokuapp.com/api";
-  static const Map<String, String> defaultJsonHeader = <String, String>{
+  static const String _host = "https://lift-log-prod.herokuapp.com/api";
+  static const Map<String, String> _defaultJsonHeader = <String, String>{
     'Content-Type': 'application/json; charset=UTF-8',
   };
+
   static Map<String, String> jsonHeaderWithAuthToken(User user) {
     return <String, String>{
       'Content-Type': 'application/json; charset=UTF-8',
@@ -18,15 +20,19 @@ class APIService {
     };
   }
 
+  static String parameteriseQuery(Map<String, String> params) {
+    return "?" + params.entries.map((e) => "${e.key}=${e.value}").join("&");
+  }
+
   // Authentication
 
   static Future<Either<User, String>> login(
       final String username, final String password) async {
-    final Uri url = Uri.parse("$host/auth/login");
+    final Uri url = Uri.parse("$_host/auth/login");
 
     Response response = await post(
       url,
-      headers: defaultJsonHeader,
+      headers: _defaultJsonHeader,
       body: jsonEncode(<String, String>{
         'username': username,
         'password': password,
@@ -43,10 +49,10 @@ class APIService {
 
   static Future<Either<bool, String>> signup(
       String username, String password) async {
-    final Uri url = Uri.parse("$host/auth/signup");
+    final Uri url = Uri.parse("$_host/auth/signup");
     Response response = await post(
       url,
-      headers: defaultJsonHeader,
+      headers: _defaultJsonHeader,
       body: jsonEncode(<String, String>{
         'username': username,
         'password': password,
@@ -61,8 +67,9 @@ class APIService {
 
   // Exercises
 
-  static Future<List<Exercise>> getExercises(User user) async {
-    final Uri url = Uri.parse("$host/${user.username}/exercises");
+  static Future<List<Exercise>> getExercises() async {
+    User user = GlobalUser.user!;
+    final Uri url = Uri.parse("$_host/${user.username}/exercises");
     Response response = await get(url, headers: jsonHeaderWithAuthToken(user));
 
     if (response.statusCode == HttpStatus.ok) {
@@ -73,8 +80,9 @@ class APIService {
     return [];
   }
 
-  static Future<bool> createExercise(User user, String exerciseName) async {
-    final Uri url = Uri.parse("$host/${user.username}/exercises");
+  static Future<bool> createExercise(String exerciseName) async {
+    User user = GlobalUser.user!;
+    final Uri url = Uri.parse("$_host/${user.username}/exercises");
     Response response = await post(
       url,
       headers: jsonHeaderWithAuthToken(user),
@@ -87,10 +95,10 @@ class APIService {
     return false;
   }
 
-  static Future<bool> updateExercise(
-      User user, Exercise exercise, String newName) async {
+  static Future<bool> updateExercise(Exercise exercise, String newName) async {
+    User user = GlobalUser.user!;
     final Uri url =
-        Uri.parse("$host/${user.username}/exercises/${exercise.id}");
+        Uri.parse("$_host/${user.username}/exercises/${exercise.id}");
     Response response = await put(
       url,
       headers: jsonHeaderWithAuthToken(user),
@@ -103,9 +111,10 @@ class APIService {
     return false;
   }
 
-  static Future<bool> deleteExercises(User user, Exercise exercise) async {
+  static Future<bool> deleteExercise(Exercise exercise) async {
+    User user = GlobalUser.user!;
     final Uri url =
-        Uri.parse("$host/${user.username}/exercises/${exercise.id}");
+        Uri.parse("$_host/${user.username}/exercises/${exercise.id}");
     Response response = await delete(
       url,
       headers: jsonHeaderWithAuthToken(user),
@@ -115,5 +124,72 @@ class APIService {
       return true;
     }
     return false;
+  }
+
+  // Sessions
+
+  static Future<List<Session>> getSessions(int start, int limit) async {
+    User user = GlobalUser.user!;
+    Map<String, String> query = {
+      'start': start.toString(),
+      'limit': limit.toString(),
+    };
+
+    final Uri url =
+        Uri.parse("$_host/${user.username}/sessions" + parameteriseQuery(query));
+
+    Response response = await get(url, headers: jsonHeaderWithAuthToken(user));
+
+    if (response.statusCode == HttpStatus.ok) {
+      dynamic json = jsonDecode(response.body);
+      List<dynamic> rawSessions = json['sessions'];
+      return rawSessions.map((s) => Session.fromJson(s)).toList();
+    }
+
+    return [];
+  }
+
+  static Future<Session?> createSession(Session session) async {
+    User user = GlobalUser.user!;
+    final Uri url = Uri.parse("$_host/${user.username}/sessions");
+
+    Response response = await post(url,
+        headers: jsonHeaderWithAuthToken(user),
+        body: jsonEncode(<String, String>{
+          "name": session.name,
+          "date": session.getDateInDatabaseFormat(),
+          "location": session.location,
+        }));
+
+    if (response.statusCode == HttpStatus.created) {
+      dynamic json = jsonDecode(response.body);
+      return Session.fromJson(json["createdSession"]);
+    }
+    return null;
+  }
+
+  static Future<bool> updateSession(Session session) async {
+    User user = GlobalUser.user!;
+    final Uri url = Uri.parse("$_host/${user.username}/sessions/${session.id}");
+
+    Response response = await put(url,
+        headers: jsonHeaderWithAuthToken(user),
+        body: jsonEncode(<String, String>{
+          "name": session.name,
+          "date": session.getDateInDatabaseFormat(),
+          "location": session.location,
+        }));
+
+    return response.statusCode == HttpStatus.ok;
+  }
+
+  static Future<bool> deleteSession(Session session) async {
+    User user = GlobalUser.user!;
+    final Uri url = Uri.parse("$_host/${user.username}/sessions/${session.id}");
+
+    Response response =
+        await delete(url, headers: jsonHeaderWithAuthToken(user));
+
+    return response.statusCode == HttpStatus.ok;
   }
 }

@@ -1,16 +1,12 @@
-import 'dart:math';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:liftlogmobile/models/exercise.dart';
-import 'package:liftlogmobile/models/user.dart';
 import 'package:liftlogmobile/services/api_service.dart';
-import 'package:liftlogmobile/widgets/quick_dialog.dart';
 
 class _EditExerciseDialog extends StatelessWidget {
-  Exercise _exercise;
-  Function _reloadExercises;
-  TextEditingController _exerciseNameController = new TextEditingController();
+  final Exercise _exercise;
+  final Function _reloadExercises;
+  final TextEditingController _exerciseNameController = new TextEditingController();
 
   _EditExerciseDialog(this._exercise, this._reloadExercises) {
     _exerciseNameController.text = _exercise.name;
@@ -34,7 +30,6 @@ class _EditExerciseDialog extends StatelessWidget {
         CupertinoDialogAction(
           child: Text(
             "Cancel",
-            //style: Styles.dialogActionNormal(context),
           ),
           onPressed: () {
             Navigator.pop(context);
@@ -47,8 +42,7 @@ class _EditExerciseDialog extends StatelessWidget {
           ),
           onPressed: () async {
             String newName = _exerciseNameController.text;
-            bool updated = await APIService.updateExercise(
-                GlobalUser.user!, _exercise, newName);
+            bool updated = await APIService.updateExercise(_exercise, newName);
             if (updated) {
               _reloadExercises();
               Navigator.pop(context);
@@ -87,8 +81,7 @@ class _DeleteExerciseDialog extends StatelessWidget {
             //style: Styles.dialogActionNormal(context),
           ),
           onPressed: () async {
-            bool deleted =
-                await APIService.deleteExercises(GlobalUser.user!, _exercise);
+            bool deleted = await APIService.deleteExercise(_exercise);
             if (deleted) {
               _reloadExercises();
               Navigator.pop(context);
@@ -173,30 +166,6 @@ class ExerciseListItem extends StatelessWidget {
                 },
               ),
             ),
-
-            //CupertinoContextMenu(
-            //  child: Padding(
-            //    padding: EdgeInsets.only(right: 10, top: 10, bottom: 10),
-            //    child: Icon(CupertinoIcons.ellipsis),
-            //  ),
-            //  actions: [
-            //    CupertinoContextMenuAction(
-            //      child: Text("Edit"),
-            //      onPressed: () {
-            //        //Navigator.pop(context);
-            //        showCupertinoDialog(
-            //            context: context,
-            //            builder: (BuildContext buildContext) {
-            //              return _EditExerciseDialog(_exercise, _reloadExercises);
-            //            });
-            //      },
-            //    ),
-            //    CupertinoContextMenuAction(
-            //      child: Text("Delete"),
-            //      onPressed: () {},
-            //    ),
-            //  ],
-            //),
           ],
         ),
       ),

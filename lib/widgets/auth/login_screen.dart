@@ -4,14 +4,13 @@ import 'package:flutter/material.dart';
 
 import 'package:liftlogmobile/lift_log_app.dart';
 import 'package:liftlogmobile/models/user.dart';
-import 'package:liftlogmobile/screens/auth/signup_screen.dart';
+import 'package:liftlogmobile/widgets/shared/auth_text_field.dart';
+import 'package:liftlogmobile/widgets/auth/signup_screen.dart';
 import 'package:liftlogmobile/services/api_service.dart';
 import 'package:liftlogmobile/services/local_storage_service.dart';
 import 'package:liftlogmobile/utils/auth_field_validator.dart';
 import 'package:liftlogmobile/utils/styles.dart';
-import 'package:liftlogmobile/widgets/quick_dialog.dart';
-
-import '../../widgets/auth_text_field.dart';
+import 'package:liftlogmobile/widgets/shared/quick_dialog.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -96,9 +95,11 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             UnconstrainedBox(
               child: CupertinoButton.filled(
-                disabledColor: Styles.disabledAuthButton(),
+                disabledColor: Styles.disabledAuthButton(context),
                 borderRadius: const BorderRadius.all(Radius.circular(8)),
-                child: _buttonAvailable ? const Text("Login") : const Text("Processing"),
+                child: _buttonAvailable
+                    ? const Text("Login")
+                    : const Text("Processing"),
                 onPressed: _buttonAvailable ? _submitLogin : null,
               ),
             ),
@@ -110,7 +111,7 @@ class _LoginScreenState extends State<LoginScreen> {
               onPressed: () async {
                 CupertinoPageRoute signupPageRoute =
                     CupertinoPageRoute(builder: (context) => SignUpScreen());
-                dynamic usernameAndPassword = await Navigator.pushReplacement(
+                dynamic usernameAndPassword = await Navigator.push(
                   context,
                   signupPageRoute,
                 );

@@ -1,13 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:liftlogmobile/lift_log_app.dart';
 import 'package:liftlogmobile/models/exercise.dart';
-import 'package:liftlogmobile/models/user.dart';
-import 'package:liftlogmobile/screens/auth/login_screen.dart';
+import 'package:liftlogmobile/widgets/auth/login_screen.dart';
 import 'package:liftlogmobile/services/local_storage_service.dart';
-import 'package:liftlogmobile/widgets/add_exercise_item.dart';
-import 'package:liftlogmobile/widgets/exercise_list_item.dart';
-import 'package:liftlogmobile/widgets/navigation_bar_text.dart';
+import 'package:liftlogmobile/widgets/exercise_library/exercise_list_item.dart';
+import 'package:liftlogmobile/widgets/shared/navigation_bar_text.dart';
+
+import 'add_exercise_item.dart';
 
 class ExerciseLibraryTab extends StatefulWidget {
   Function _reloadExercises;

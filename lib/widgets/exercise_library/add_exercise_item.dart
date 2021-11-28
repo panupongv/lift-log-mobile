@@ -41,7 +41,7 @@ class _AddExerciseDialog extends StatelessWidget {
           onPressed: () async {
             String name = _exerciseNameController.text;
             bool created =
-                await APIService.createExercise(GlobalUser.user!, name);
+                await APIService.createExercise(name);
             if (created) {
               _reloadExercises();
               Navigator.pop(context);

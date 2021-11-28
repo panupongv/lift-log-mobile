@@ -1,10 +1,10 @@
 import 'package:dartz/dartz.dart' as dz;
 import 'package:flutter/cupertino.dart';
+import 'package:liftlogmobile/widgets/shared/auth_text_field.dart';
 import 'package:liftlogmobile/utils/styles.dart';
-import 'package:liftlogmobile/widgets/auth_text_field.dart';
 import 'package:liftlogmobile/services/api_service.dart';
 import 'package:liftlogmobile/utils/auth_field_validator.dart';
-import 'package:liftlogmobile/widgets/quick_dialog.dart';
+import 'package:liftlogmobile/widgets/shared/quick_dialog.dart';
 
 class SignUpScreen extends StatefulWidget {
   @override
@@ -12,7 +12,7 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
-  TextEditingController _usernameController = TextEditingController(),
+  final TextEditingController _usernameController = TextEditingController(),
       _passwordController = TextEditingController(),
       _confirmPasswordController = TextEditingController();
 
@@ -80,10 +80,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   Widget _submitButton(BuildContext context) => UnconstrainedBox(
         child: CupertinoButton.filled(
-          disabledColor: Styles.disabledAuthButton(),
+          disabledColor: Styles.disabledAuthButton(context),
           borderRadius: const BorderRadius.all(Radius.circular(8)),
-          child: _buttonAvailable? const Text("Submit"):const Text("Processing"),
-          onPressed: _buttonAvailable? _submitSignup:null,
+          child: _buttonAvailable
+              ? const Text("Submit")
+              : const Text("Processing"),
+          onPressed: _buttonAvailable ? _submitSignup : null,
         ),
       );
 
@@ -91,6 +93,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(
+        automaticallyImplyLeading: true,
         middle: Text("Lift Log"),
       ),
       child: Center(
