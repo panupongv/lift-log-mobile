@@ -1,13 +1,13 @@
 import 'package:flutter/cupertino.dart';
-import 'package:liftlogmobile/screens/auth/login_screen.dart';
+import 'package:liftlogmobile/widgets/auth/login_screen.dart';
 import 'package:liftlogmobile/services/api_service.dart';
 import 'package:liftlogmobile/services/local_storage_service.dart';
 
 import 'models/exercise.dart';
 import 'models/user.dart';
-import 'screens/overview_tab.dart';
-import 'screens/exercise_library/exercise_library_tab.dart';
-import 'screens/log/log_tab.dart';
+import 'widgets/overview_tab.dart';
+import 'widgets/exercise_library/exercise_library_tab.dart';
+import 'widgets/log/log_tab.dart';
 
 class LiftLogApp extends StatefulWidget {
 

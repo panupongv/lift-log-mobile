@@ -4,11 +4,10 @@ import 'package:flutter/material.dart';
 abstract class Styles {
   // Colors
   static Color _dynamicColor(
-      BuildContext context, Color normalColor, Color darkModeColor) {
-    return CupertinoTheme.brightnessOf(context) == Brightness.dark
-        ? darkModeColor
-        : normalColor;
-  }
+          BuildContext context, Color normalColor, Color darkModeColor) =>
+      CupertinoTheme.brightnessOf(context) == Brightness.dark
+          ? darkModeColor
+          : normalColor;
 
   static Color _defaultText(context) =>
       _dynamicColor(context, CupertinoColors.black, CupertinoColors.white);
@@ -19,7 +18,8 @@ abstract class Styles {
         CupertinoColors.inactiveGray.darkColor,
       );
 
-  static Color activeColor(context) => _dynamicColor(context, CupertinoColors.activeBlue.color, CupertinoColors.activeBlue.darkColor);
+  static Color activeColor(context) => _dynamicColor(context,
+      CupertinoColors.activeBlue.color, CupertinoColors.activeBlue.darkColor);
   static Color inactiveColor(context) => _dynamicGrey(context);
 
   static Color cautiousActionColor(context) => _dynamicColor(context,
@@ -37,9 +37,45 @@ abstract class Styles {
 
   static Color ellipsisIcon(context) => _dynamicGrey(context);
 
+  static Color datePicker(context) =>
+      _dynamicColor(context, CupertinoColors.white, CupertinoColors.black);
+
   // TextStyles
 
   static const String _defaultFontFamily = 'SFPro';
+
+  static TextStyle dialogTitle(context) {
+    return TextStyle(
+      fontFamily: _defaultFontFamily,
+      color: _defaultText(context),
+      fontWeight: FontWeight.w600,
+      fontSize: 17,
+    );
+  }
+
+  static TextStyle dialogContent(context) {
+    return TextStyle(
+      fontFamily: _defaultFontFamily,
+      color: _defaultText(context),
+      fontSize: 13,
+    );
+  }
+
+  static TextStyle dialogActionNormal(context) {
+    return TextStyle(
+      fontFamily: _defaultFontFamily,
+      color: activeColor(context),
+      fontSize: 17,
+    );
+  }
+
+  static TextStyle dialogActionCrucial(context) {
+    return TextStyle(
+      fontFamily: _defaultFontFamily,
+      color: cautiousActionColor(context),
+      fontSize: 17,
+    );
+  }
 
   static TextStyle navigationBarTitle(context) => TextStyle(
         fontFamily: 'SFPro',
@@ -60,8 +96,7 @@ abstract class Styles {
       );
 
   static TextStyle cautiousDialogAction(context, isActive) => TextStyle(
-    color: isActive? cautiousActionColor(context) : _dynamicGrey(context)
-  );
+      color: isActive ? cautiousActionColor(context) : _dynamicGrey(context));
 
   static TextStyle sessionListItemHeader(context) => TextStyle(
       fontFamily: _defaultFontFamily,
@@ -73,4 +108,14 @@ abstract class Styles {
       fontFamily: _defaultFontFamily,
       fontSize: 14,
       color: _dynamicGrey(context));
+
+  static TextStyle loadMoreButton(context) => TextStyle(
+      fontFamily: _defaultFontFamily,
+      fontSize: 17,
+      color: _defaultText(context));
+
+  static TextStyle editSessionLabels(context) => TextStyle(
+      fontFamily: _defaultFontFamily,
+      fontSize: 17,
+      color: _defaultText(context));
 }

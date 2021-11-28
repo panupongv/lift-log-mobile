@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:liftlogmobile/lift_log_app.dart';
-import 'package:liftlogmobile/screens/auth/login_screen.dart';
+import 'package:liftlogmobile/widgets/auth/login_screen.dart';
 import 'package:liftlogmobile/services/local_storage_service.dart';
 
 import 'models/user.dart';
