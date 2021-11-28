@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:liftlogmobile/models/session.dart';
+import 'package:liftlogmobile/utils/text_utils.dart';
 import 'package:liftlogmobile/widgets/log/session_edit_screen.dart';
 import 'package:liftlogmobile/services/api_service.dart';
 import 'package:liftlogmobile/utils/styles.dart';
@@ -52,13 +53,6 @@ class _SessionListItemState extends State<SessionListItem> {
         ),
       ],
     );
-  }
-
-  String trimOverflow(String content, int limit) {
-    if (content.length > limit) {
-      return content.substring(0, limit) + "...";
-    }
-    return content;
   }
 
   Widget ellipsisOptions() {
@@ -139,7 +133,7 @@ class _SessionListItemState extends State<SessionListItem> {
                 Padding(
                   padding: const EdgeInsets.only(left: 15, top: 10, bottom: 5),
                   child: Text(
-                    trimOverflow(widget._session.name, 28),
+                    TextUtils.trimOverflow(widget._session.name, 28),
                     style: Styles.sessionListItemHeader(context)
                     //overflow: TextOverflow.ellipsis,
                   ),
@@ -175,7 +169,7 @@ class _SessionListItemState extends State<SessionListItem> {
                                     color: Styles.iconGrey(context)),
                                 Container(width: 5),
                                 Text(
-                                  trimOverflow(widget._session.location, 14),
+                                  TextUtils.trimOverflow(widget._session.location, 14),
                                   style: Styles.sessionListItemDetails(context),
                                 ),
                               ]
