@@ -1,17 +1,12 @@
 import 'package:flutter/cupertino.dart';
-import 'package:liftlogmobile/widgets/auth/login_screen.dart';
 import 'package:liftlogmobile/services/api_service.dart';
-import 'package:liftlogmobile/services/local_storage_service.dart';
 
 import 'models/exercise.dart';
-import 'models/user.dart';
-import 'widgets/overview_tab.dart';
+import 'widgets/overview/overview_tab.dart';
 import 'widgets/exercise_library/exercise_library_tab.dart';
 import 'widgets/log/log_tab.dart';
 
 class LiftLogApp extends StatefulWidget {
-
-  // This widget is the root of your application.
   @override
   State<LiftLogApp> createState() => _LiftLogAppState();
 }
@@ -19,7 +14,6 @@ class LiftLogApp extends StatefulWidget {
 class _LiftLogAppState extends State<LiftLogApp> {
   int _currentIndex = 0;
   List<Exercise> _exercises = [];
-  List<Widget> _tabs = [];
 
   _LiftLogAppState();
 
@@ -35,10 +29,12 @@ class _LiftLogAppState extends State<LiftLogApp> {
 
   void _reloadExerciseList() async {
     List<Exercise> updatedExercises = await APIService.getExercises();
+    updatedExercises
+        .sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
     setState(() {
       _exercises = updatedExercises;
     });
-   }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -87,7 +83,6 @@ class _LiftLogAppState extends State<LiftLogApp> {
                 return navigatorKey2;
             }
           }(),
-          //builder: (BuildContext context) => _tabs[index],
           builder: (BuildContext context) {
             switch (index) {
               case 0:

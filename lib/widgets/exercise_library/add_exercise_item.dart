@@ -2,17 +2,18 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:liftlogmobile/models/user.dart';
 import 'package:liftlogmobile/services/api_service.dart';
+import 'package:liftlogmobile/utils/styles.dart';
 
 class _AddExerciseDialog extends StatelessWidget {
-  Function _reloadExercises;
-  TextEditingController _exerciseNameController = new TextEditingController();
+  final Function _reloadExercises;
+  final TextEditingController _exerciseNameController = TextEditingController();
 
   _AddExerciseDialog(this._reloadExercises);
 
   @override
   Widget build(BuildContext context) {
     return CupertinoAlertDialog(
-      title: Text("Enter Exercise Name"),
+      title: Text("Enter Exercise Name", style: Styles.dialogTitle(context)),
       content: Column(
         children: [
           Container(
@@ -27,7 +28,7 @@ class _AddExerciseDialog extends StatelessWidget {
         CupertinoDialogAction(
           child: Text(
             "Cancel",
-            //style: Styles.dialogActionNormal(context),
+            style: Styles.dialogActionNormal(context),
           ),
           onPressed: () {
             Navigator.pop(context);
@@ -36,12 +37,11 @@ class _AddExerciseDialog extends StatelessWidget {
         CupertinoDialogAction(
           child: Text(
             "Create",
-            //style: Styles.dialogActionNormal(context),
+            style: Styles.dialogActionNormal(context),
           ),
           onPressed: () async {
             String name = _exerciseNameController.text;
-            bool created =
-                await APIService.createExercise(name);
+            bool created = await APIService.createExercise(name);
             if (created) {
               _reloadExercises();
               Navigator.pop(context);
@@ -54,7 +54,7 @@ class _AddExerciseDialog extends StatelessWidget {
 }
 
 class AddExerciseItem extends StatelessWidget {
-  Function _reloadExercise;
+  final Function _reloadExercise;
 
   AddExerciseItem(this._reloadExercise);
 
@@ -62,28 +62,21 @@ class AddExerciseItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       child: Padding(
-        padding: EdgeInsets.all(10),
+        padding: const EdgeInsets.only(top: 15),
         child: Container(
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.transparent),
-            borderRadius: BorderRadius.all(Radius.circular(8)),
-          ),
           alignment: Alignment.center,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                CupertinoIcons.add_circled,
-                color: Colors.lightGreen,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Styles.listItemBackground(context),
+              borderRadius: const BorderRadius.all(Radius.circular(8)),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 15),
+              child: Text(
+                "Add Exercise",
+                style: Styles.addExercise(context),
               ),
-              Container(
-                width: 5,
-              ),
-              Padding(
-                padding: EdgeInsets.only(top: 10, bottom: 10),
-                child: Text("Add Exercise"),
-              ),
-            ],
+            ),
           ),
         ),
       ),
