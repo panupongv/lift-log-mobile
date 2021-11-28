@@ -118,4 +118,15 @@ abstract class Styles {
       fontFamily: _defaultFontFamily,
       fontSize: 17,
       color: _defaultText(context));
+
+  static TextStyle exerciseItemHeader(context) => TextStyle(
+      fontFamily: _defaultFontFamily,
+      fontSize: 17,
+      fontWeight: FontWeight.bold,
+      color: _defaultText(context));
+
+  static TextStyle addExercise(context) => TextStyle(
+      fontFamily: _defaultFontFamily,
+      fontSize: 17,
+      color: _defaultText(context));
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:liftlogmobile/models/exercise.dart';
+import 'package:liftlogmobile/utils/styles.dart';
 import 'package:liftlogmobile/widgets/auth/login_screen.dart';
 import 'package:liftlogmobile/services/local_storage_service.dart';
 import 'package:liftlogmobile/widgets/exercise_library/exercise_list_item.dart';
@@ -21,14 +22,14 @@ class ExerciseLibraryTab extends StatefulWidget {
 class _ExerciseLibraryTabState extends State<ExerciseLibraryTab> {
   bool _showSearch = false;
   String _searchText = "";
-  TextEditingController _searchTextController = TextEditingController();
-  FocusNode _focusNode = FocusNode();
+  final TextEditingController _searchTextController = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
 
   Widget _navigationBarLeadingWidget() {
     return _showSearch
         ? Container(width: 0)
         : GestureDetector(
-            child: Icon(CupertinoIcons.search),
+            child: const Icon(CupertinoIcons.search),
             onTap: () {
               setState(() {
                 _showSearch = true;
@@ -61,20 +62,28 @@ class _ExerciseLibraryTabState extends State<ExerciseLibraryTab> {
           context: context,
           builder: (BuildContext context) {
             return CupertinoAlertDialog(
-              title: const Text("Logout"),
-              content: const Text("Are you sure?"),
+              title: Text(
+                "Logout",
+                style: Styles.dialogTitle(context),
+              ),
+              content: Text(
+                "Are you sure?",
+                style: Styles.dialogContent(context),
+              ),
               actions: <Widget>[
                 CupertinoDialogAction(
-                  child: const Text(
+                  child: Text(
                     "Cancel",
+                    style: Styles.dialogActionNormal(context),
                   ),
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
                 ),
                 CupertinoDialogAction(
-                  child: const Text(
-                    "Confirm",
+                  child: Text(
+                    "Logout",
+                    style: Styles.dialogActionCrucial(context),
                   ),
                   onPressed: () async {
                     await LocalStorageService.removeSavedUser();
@@ -94,7 +103,7 @@ class _ExerciseLibraryTabState extends State<ExerciseLibraryTab> {
   Widget _navigationBarTrailingWidget() {
     return _showSearch
         ? Padding(
-            padding: EdgeInsets.only(left: 8),
+            padding: const EdgeInsets.only(left: 8),
             child: navigationBarTextButton(context, "Cancel", () {
               setState(() {
                 _focusNode.unfocus();
@@ -110,6 +119,7 @@ class _ExerciseLibraryTabState extends State<ExerciseLibraryTab> {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
+      backgroundColor: Styles.defaultBackground(context),
       navigationBar: CupertinoNavigationBar(
         automaticallyImplyLeading: false,
         leading: _navigationBarLeadingWidget(),
