@@ -1,14 +1,18 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:liftlogmobile/models/exercise.dart';
 import 'package:liftlogmobile/models/session.dart';
 import 'package:liftlogmobile/widgets/log/session_edit_screen.dart';
 import 'package:liftlogmobile/services/api_service.dart';
 import 'package:liftlogmobile/utils/styles.dart';
+import 'package:liftlogmobile/widgets/log/session_screen.dart';
 import 'package:liftlogmobile/widgets/shared/navigation_bar_text.dart';
 import 'package:liftlogmobile/widgets/log/session_list_item.dart';
 
 class LogTab extends StatefulWidget {
-  LogTab();
+  Map<String, Exercise> _exerciseMap;
+
+  LogTab(this._exerciseMap);
 
   @override
   State<LogTab> createState() => _LogTabState();
@@ -59,6 +63,22 @@ class _LogTabState extends State<LogTab> {
     }
   }
 
+  Widget _newSessionButton() {
+    return navigationBarTextButton(
+      context,
+      "New Session",
+      () async {
+        CupertinoPageRoute sessionEditRoute = CupertinoPageRoute(
+            builder: (buildContext) => SessionEditScreen(null));
+        dynamic createdSession =
+            await Navigator.push(context, sessionEditRoute);
+        if (createdSession != null && createdSession is Session) {
+          _loadSessions(reset: true);
+        }
+      },
+    );
+  }
+
   Widget _loadMoreButton() {
     return Container(
       alignment: Alignment.center,
@@ -95,20 +115,10 @@ class _LogTabState extends State<LogTab> {
     );
   }
 
-  Widget _newSessionButton() {
-    return navigationBarTextButton(
-      context,
-      "New Session",
-      () async {
-        CupertinoPageRoute sessionEditRoute = CupertinoPageRoute(
-            builder: (buildContext) => SessionEditScreen(null));
-        dynamic createdSession =
-            await Navigator.push(context, sessionEditRoute);
-        if (createdSession != null && createdSession is Session) {
-          _loadSessions(reset: true);
-        }
-      },
-    );
+  void _navigateIndividualSession(Session session) {
+    CupertinoPageRoute sessionPageRoute = CupertinoPageRoute(
+        builder: (buildContext) => SessionScreen(session, widget._exerciseMap));
+    Navigator.push(context, sessionPageRoute);
   }
 
   @override
@@ -128,7 +138,7 @@ class _LogTabState extends State<LogTab> {
             children: <Widget>[] +
                 _sessions
                     .map((Session session) =>
-                        SessionListItem(session, _loadSessions))
+                        SessionListItem(session, _loadSessions, _navigateIndividualSession))
                     .toList() +
                 <Widget>[_loadMoreButton()],
           ),

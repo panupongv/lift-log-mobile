@@ -13,7 +13,7 @@ class LiftLogApp extends StatefulWidget {
 
 class _LiftLogAppState extends State<LiftLogApp> {
   int _currentIndex = 0;
-  List<Exercise> _exercises = [];
+  Map<String, Exercise> _exerciseMap = Map<String, Exercise>();
 
   _LiftLogAppState();
 
@@ -32,7 +32,8 @@ class _LiftLogAppState extends State<LiftLogApp> {
     updatedExercises
         .sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
     setState(() {
-      _exercises = updatedExercises;
+      _exerciseMap =
+          { for (Exercise e in updatedExercises) e.id : e };
     });
   }
 
@@ -88,9 +89,10 @@ class _LiftLogAppState extends State<LiftLogApp> {
               case 0:
                 return OverviewTab();
               case 1:
-                return LogTab();
+                return LogTab(_exerciseMap);
               case 2:
-                return ExerciseLibraryTab(_reloadExerciseList, _exercises);
+                return ExerciseLibraryTab(
+                    _reloadExerciseList, _exerciseMap);
               default:
                 return const Text("Tab Unavailable");
             }
