@@ -10,10 +10,10 @@ import 'package:liftlogmobile/widgets/shared/navigation_bar_text.dart';
 import 'add_exercise_item.dart';
 
 class ExerciseLibraryTab extends StatefulWidget {
-  Function _reloadExercises;
-  List<Exercise> _exercises;
+  final Function _reloadExercises;
+  final Map<String, Exercise> _exerciseMap;
 
-  ExerciseLibraryTab(this._reloadExercises, this._exercises);
+  ExerciseLibraryTab(this._reloadExercises, this._exerciseMap);
 
   @override
   State<ExerciseLibraryTab> createState() => _ExerciseLibraryTabState();
@@ -130,7 +130,7 @@ class _ExerciseLibraryTabState extends State<ExerciseLibraryTab> {
         top: true,
         child: ListView(
           children: <Widget>[AddExerciseItem(widget._reloadExercises)] +
-              widget._exercises
+              widget._exerciseMap.values
                   .where((Exercise element) {
                     return element.name.toLowerCase().contains(_searchText);
                   })
