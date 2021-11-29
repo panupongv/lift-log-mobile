@@ -40,6 +40,9 @@ abstract class Styles {
   static Color datePicker(context) =>
       _dynamicColor(context, CupertinoColors.white, CupertinoColors.black);
 
+  static Color sessionInfoBackground(context) =>
+      _dynamicColor(context, CupertinoColors.white, CupertinoColors.black);
+
   // TextStyles
 
   static const String _defaultFontFamily = 'SFPro';
@@ -98,6 +101,8 @@ abstract class Styles {
   static TextStyle cautiousDialogAction(context, isActive) => TextStyle(
       color: isActive ? cautiousActionColor(context) : _dynamicGrey(context));
 
+
+
   static TextStyle sessionListItemHeader(context) => TextStyle(
       fontFamily: _defaultFontFamily,
       fontSize: 17,
@@ -114,10 +119,18 @@ abstract class Styles {
       fontSize: 17,
       color: _defaultText(context));
 
+  static TextStyle sessionPageInfo(context) => TextStyle(
+      fontFamily: _defaultFontFamily,
+      fontSize: 15,
+      color: _defaultText(context));
+
   static TextStyle editSessionLabels(context) => TextStyle(
       fontFamily: _defaultFontFamily,
       fontSize: 17,
       color: _defaultText(context));
+
+
+
 
   static TextStyle exerciseItemHeader(context) => TextStyle(
       fontFamily: _defaultFontFamily,
