@@ -6,6 +6,7 @@ import 'package:http/http.dart';
 import 'package:liftlogmobile/models/exercise.dart';
 import 'package:liftlogmobile/models/session.dart';
 import 'package:liftlogmobile/models/user.dart';
+import 'package:liftlogmobile/models/workout.dart';
 
 class APIService {
   static const String _host = "https://lift-log-prod.herokuapp.com/api";
@@ -105,10 +106,7 @@ class APIService {
       body: jsonEncode(<String, String>{'exerciseName': newName}),
     );
 
-    if (response.statusCode == HttpStatus.ok) {
-      return true;
-    }
-    return false;
+    return response.statusCode == HttpStatus.ok;
   }
 
   static Future<bool> deleteExercise(Exercise exercise) async {
@@ -120,10 +118,7 @@ class APIService {
       headers: jsonHeaderWithAuthToken(user),
     );
 
-    if (response.statusCode == HttpStatus.ok) {
-      return true;
-    }
-    return false;
+    return response.statusCode == HttpStatus.ok;
   }
 
   // Sessions
@@ -135,8 +130,8 @@ class APIService {
       'limit': limit.toString(),
     };
 
-    final Uri url =
-        Uri.parse("$_host/${user.username}/sessions" + parameteriseQuery(query));
+    final Uri url = Uri.parse(
+        "$_host/${user.username}/sessions" + parameteriseQuery(query));
 
     Response response = await get(url, headers: jsonHeaderWithAuthToken(user));
 
@@ -145,7 +140,6 @@ class APIService {
       List<dynamic> rawSessions = json['sessions'];
       return rawSessions.map((s) => Session.fromJson(s)).toList();
     }
-
     return [];
   }
 
@@ -190,6 +184,50 @@ class APIService {
     Response response =
         await delete(url, headers: jsonHeaderWithAuthToken(user));
 
+    return response.statusCode == HttpStatus.ok;
+  }
+
+  // Workouts
+
+  static Future<List<Workout>> getWorkouts(Session session) async {
+    User user = GlobalUser.user!;
+    final Uri url = Uri.parse("$_host/${user.username}/sessions/${session.id}");
+
+    Response response = await get(url, headers: jsonHeaderWithAuthToken(user));
+
+    if (response.statusCode == HttpStatus.ok) {
+      dynamic json = jsonDecode(response.body);
+      List<dynamic> rawWorkouts = json['session']['workouts'];
+      return rawWorkouts.map((w) => Workout.fromJson(w)).toList();
+    }
+    return [];
+  }
+
+  static Future<bool> createWorkout(Session session, Workout workout) async {
+    User user = GlobalUser.user!;
+    final Uri url = Uri.parse("$_host/${user.username}/sessions/${session.id}");
+
+    Response response = await post(url,
+        headers: jsonHeaderWithAuthToken(user),
+        body: jsonEncode(<String, String>{
+          "exerciseId": workout.exerciseId,
+          "content": workout.content
+        }));
+
+    return response.statusCode == HttpStatus.created;
+  }
+
+  static Future<bool> deleteWorkout(Session session, Workout workout) async {
+    User user = GlobalUser.user!;
+    final Uri url = Uri.parse(
+        "$_host/${user.username}/sessions/${session.id}/${workout.id}");
+
+    Response response = await delete(
+      url,
+      headers: jsonHeaderWithAuthToken(user),
+    );
+
+    print(response.body);
     return response.statusCode == HttpStatus.ok;
   }
 }

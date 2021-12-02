@@ -121,13 +121,24 @@ abstract class Styles {
 
   static TextStyle sessionPageInfo(context) => TextStyle(
       fontFamily: _defaultFontFamily,
-      fontSize: 15,
+      fontSize: 17,
       color: _defaultText(context));
 
   static TextStyle editSessionLabels(context) => TextStyle(
       fontFamily: _defaultFontFamily,
       fontSize: 17,
       color: _defaultText(context));
+
+  static TextStyle workoutListItemHeader(context) => TextStyle(
+      fontFamily: _defaultFontFamily,
+      fontSize: 17,
+      fontWeight: FontWeight.bold,
+      color: _defaultText(context));
+
+  static TextStyle workoutListItemDetails(context) => TextStyle(
+      fontFamily: _defaultFontFamily,
+      fontSize: 14,
+      color: _dynamicGrey(context));
 
 
 

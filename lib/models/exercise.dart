@@ -24,4 +24,9 @@ class Exercise {
     return Exercise(json['_id'], json['name']);
   }
 
+  @override
+  String toString() {
+    return "id: $id, name: $name";
+  }
+
 }
