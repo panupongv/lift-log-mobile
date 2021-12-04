@@ -217,6 +217,22 @@ class APIService {
     return response.statusCode == HttpStatus.created;
   }
 
+  static Future<bool> updateWorkout(Session session, Workout workout) async {
+    User user = GlobalUser.user!;
+    final Uri url = Uri.parse(
+        "$_host/${user.username}/sessions/${session.id}/${workout.id}");
+
+    Response response = await put(url,
+        headers: jsonHeaderWithAuthToken(user),
+        body: jsonEncode(<String, String>{
+          "exerciseId": workout.exerciseId,
+          "content": workout.content
+        }));
+
+    print(response.body);
+    return response.statusCode == HttpStatus.ok;
+  }
+
   static Future<bool> deleteWorkout(Session session, Workout workout) async {
     User user = GlobalUser.user!;
     final Uri url = Uri.parse(

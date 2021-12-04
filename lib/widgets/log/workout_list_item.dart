@@ -1,101 +1,82 @@
 import 'package:flutter/cupertino.dart';
+import 'package:liftlogmobile/models/exercise.dart';
 import 'package:liftlogmobile/models/session.dart';
 import 'package:liftlogmobile/models/workout.dart';
 import 'package:liftlogmobile/services/api_service.dart';
 import 'package:liftlogmobile/utils/styles.dart';
+import 'package:liftlogmobile/widgets/log/workout_screen.dart';
 
 class WorkoutListItem extends StatefulWidget {
-  Session _session;
-  String _exerciseName;
-  Workout _workout;
-  Function _reloadWorkouts;
+  final Session _session;
+  final Workout _workout;
+  final Map<String, Exercise> _exerciseMap;
+  final Function _reloadWorkouts;
 
-  WorkoutListItem(this._session, this._workout, this._exerciseName, this._reloadWorkouts);
+  WorkoutListItem(
+      this._session, this._workout, this._exerciseMap, this._reloadWorkouts);
 
   @override
   State<WorkoutListItem> createState() => _WorkoutListItemState();
 }
 
 class _WorkoutListItemState extends State<WorkoutListItem> {
-  Widget _deleteWorkoutDialog(
-      BuildContext context, Session session, Workout workout, Function _reloadWorkouts) {
-    bool deleting = false;
 
-    return CupertinoAlertDialog(
-      title: const Text("Delete Workout"),
-      content: const Text("Are you sure?"),
-      actions: [
-        CupertinoDialogAction(
-          child: const Text("Cancel"),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        CupertinoDialogAction(
-          child: Text("Delete",
-              style: Styles.cautiousDialogAction(context, !deleting)),
-          onPressed: () async {
-            if (!deleting) {
-              setState(() {
-                deleting = true;
-              });
-              bool deleted = await APIService.deleteWorkout(widget._session, widget._workout);
-              if (deleted) {
-                _reloadWorkouts();
-                Navigator.pop(context);
-                Navigator.pop(context);
-              }
-              setState(() {
-                deleting = false;
-              });
-            }
-          },
-        ),
-      ],
-    );
+  String _getExerciseName() {
+    String exerciseId = widget._workout.exerciseId;
+    if (exerciseId == Workout.defaultIdReference) {
+      return "";
+    }
+    Exercise? exercise = widget._exerciseMap[exerciseId];
+    if (exercise != null) return exercise.name;
+    return "";
   }
 
-  Widget _ellipsisOptions(context) {
+  Widget _deleteButton(context) {
     return Padding(
       padding: const EdgeInsets.only(right: 10, top: 10, bottom: 10),
       child: GestureDetector(
         child: Icon(
-          CupertinoIcons.ellipsis,
+          CupertinoIcons.delete,
           color: Styles.ellipsisIcon(context),
         ),
         onTap: () async {
-          await showCupertinoModalPopup(
+          bool deleting = false;
+
+          showCupertinoDialog(
             context: context,
-            builder: (BuildContext buildContext) {
-              return CupertinoActionSheet(
-                actions: [
-                  CupertinoActionSheetAction(
-                    onPressed: () {
-                      showCupertinoDialog(
-                        context: context,
-                        builder: (BuildContext buildContext) {
-                          return _deleteWorkoutDialog(
-                            buildContext,
-                            widget._session,
-                            widget._workout,
-                            widget._reloadWorkouts,
-                          );
-                        },
-                      );
-                    },
-                    child: const Text("Delete"),
-                  ),
-                ],
-                cancelButton: CupertinoActionSheetAction(
-                  child: const Text(
-                    "Cancel",
-                  ),
+            builder: (context) => CupertinoAlertDialog(
+              title: const Text("Delete Workout"),
+              content: const Text("Are you sure?"),
+              actions: [
+                CupertinoDialogAction(
+                  child: const Text("Cancel"),
                   onPressed: () {
-                    Navigator.of(buildContext).pop();
+                    Navigator.pop(context);
                   },
                 ),
-              );
-            },
+                CupertinoDialogAction(
+                  child: Text("Delete",
+                      style: Styles.cautiousDialogAction(context, !deleting)),
+                  onPressed: () async {
+                    if (!deleting) {
+                      setState(() {
+                        deleting = true;
+                      });
+                      bool deleted = await APIService.deleteWorkout(
+                          widget._session, widget._workout);
+                      if (deleted) {
+                        widget._reloadWorkouts();
+                        Navigator.pop(context);
+                        Navigator.pop(context);
+                      }
+                      setState(() {
+                        deleting = false;
+                      });
+                    }
+                  },
+                ),
+              ],
+            ),
           );
         },
       ),
@@ -104,39 +85,49 @@ class _WorkoutListItemState extends State<WorkoutListItem> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 15, left: 10, right: 10),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Styles.listItemBackground(context),
-          borderRadius: const BorderRadius.all(Radius.circular(8)),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(left: 15, top: 10, bottom: 10),
-                  child: Text(
-                    widget._workout.exerciseId.substring(0, 6) +
-                        " :: " +
-                        widget._exerciseName,
-                    style: Styles.workoutListItemHeader(context),
+    return GestureDetector(
+      onTap: () async {
+        CupertinoPageRoute workoutPageRoute = CupertinoPageRoute(
+            builder: (buildContext) => WorkoutScreen(
+                widget._session, widget._workout, widget._exerciseMap));
+        dynamic workoutSaved = await Navigator.push(context, workoutPageRoute);
+        if (workoutSaved != null && workoutSaved is bool && workoutSaved) {
+          widget._reloadWorkouts();
+        }
+      },
+      child: Padding(
+        padding: const EdgeInsets.only(top: 15, left: 10, right: 10),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Styles.listItemBackground(context),
+            borderRadius: const BorderRadius.all(Radius.circular(8)),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding:
+                        const EdgeInsets.only(left: 15, top: 10, bottom: 10),
+                    child: Text(
+                      _getExerciseName(),
+                      style: Styles.workoutListItemHeader(context),
+                    ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 15, bottom: 10),
-                  child: Text(
-                    "${widget._workout.sets} Set${widget._workout.sets==1?'':'s'}",
-                    style: Styles.workoutListItemDetails(context),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 15, bottom: 10),
+                    child: Text(
+                      "${widget._workout.sets} Set${widget._workout.sets == 1 ? '' : 's'}",
+                      style: Styles.workoutListItemDetails(context),
+                    ),
                   ),
-                ),
-              ],
-            ),
-            _ellipsisOptions(context),
-          ],
+                ],
+              ),
+              _deleteButton(context),
+            ],
+          ),
         ),
       ),
     );

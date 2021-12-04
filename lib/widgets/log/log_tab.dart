@@ -83,7 +83,7 @@ class _LogTabState extends State<LogTab> {
     return Container(
       alignment: Alignment.center,
       child: Padding(
-        padding: const EdgeInsets.only(top: 15),
+        padding: const EdgeInsets.only(top: 15, bottom: 15),
         child: _loading
             ? const CupertinoActivityIndicator()
             : GestureDetector(

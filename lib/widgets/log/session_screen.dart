@@ -139,7 +139,7 @@ class _SessionScreenState extends State<SessionScreen> {
                     return WorkoutListItem(
                         widget._session,
                         wo,
-                        exercise != null ? exercise.name : "None",
+                        widget._exerciseMap,
                         _loadWorkouts);
                   }).toList()),
         ),
