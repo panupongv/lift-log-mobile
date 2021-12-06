@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:liftlogmobile/models/exercise.dart';
 import 'package:liftlogmobile/models/session.dart';
 import 'package:liftlogmobile/models/workout.dart';
@@ -6,6 +7,7 @@ import 'package:liftlogmobile/services/api_service.dart';
 import 'package:liftlogmobile/utils/styles.dart';
 import 'package:liftlogmobile/widgets/shared/navigation_bar_text.dart';
 import 'package:liftlogmobile/widgets/shared/quick_dialog.dart';
+import 'package:reorderables/reorderables.dart';
 
 class WorkoutScreen extends StatefulWidget {
   final Session _session;
@@ -21,7 +23,6 @@ class WorkoutScreen extends StatefulWidget {
     int index =
         _exercises.indexWhere((element) => element.id == _workout.exerciseId);
     _selectedIndex = index == -1 ? 0 : index;
-    print("Index found: $_selectedIndex");
     _scrollController =
         FixedExtentScrollController(initialItem: _selectedIndex);
   }
@@ -30,19 +31,184 @@ class WorkoutScreen extends StatefulWidget {
   State<WorkoutScreen> createState() => _WorkoutScreenState();
 }
 
+class _ContentRow extends StatelessWidget {
+  int _index;
+  bool _isMoveUpAvailable = true;
+  bool _isMoveDownAvailable = true;
+  final Function _swapCallback;
+
+  final TextEditingController _weightTextController = TextEditingController();
+  final TextEditingController _repsTextController = TextEditingController();
+
+  _ContentRow(
+      this._index, int listSize, String weightAndReps, this._swapCallback) {
+    List<String> weightAndRepsSplit =
+        weightAndReps.split(Workout.weightRepsSeparator);
+    _weightTextController.text = weightAndRepsSplit[0];
+    _repsTextController.text = weightAndRepsSplit[1];
+    setIndex(_index, listSize);
+  }
+
+  void setIndex(int newIndex, int listSize) {
+    _index = newIndex;
+    _isMoveUpAvailable = _index > 0;
+    _isMoveDownAvailable = _index < listSize - 1;
+  }
+
+  String? get weightAndReps {
+    if (_weightTextController.text.isNotEmpty &&
+        _repsTextController.text.isNotEmpty) {
+      return "${_weightTextController.text}${Workout.weightRepsSeparator}${_repsTextController.text}";
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8.0),
+          color: Styles.listItemBackground(context),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 4, top: 4, bottom: 4),
+              child: SizedBox(
+                width: 50,
+                child: CupertinoTextField(
+                  keyboardType: TextInputType.number,
+                  controller: _weightTextController,
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 4, top: 4, bottom: 4),
+              child: SizedBox(
+                width: 50,
+                child: CupertinoTextField(
+                  keyboardType: TextInputType.number,
+                  controller: _repsTextController,
+                ),
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                GestureDetector(
+                  child: Icon(
+                    CupertinoIcons.up_arrow,
+                    color: _isMoveUpAvailable
+                        ? Styles.activeColor(context)
+                        : Styles.inactiveColor(context),
+                  ),
+                  onTap: () {
+                    if (_isMoveUpAvailable) {
+                      _swapCallback(_index, -1);
+                    }
+                  },
+                ),
+                GestureDetector(
+                  child: Icon(
+                    CupertinoIcons.down_arrow,
+                    color: _isMoveDownAvailable
+                        ? Styles.activeColor(context)
+                        : Styles.inactiveColor(context),
+                  ),
+                  onTap: () {
+                    if (_isMoveDownAvailable) {
+                      _swapCallback(_index, 1);
+                    }
+                  },
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _WorkoutScreenState extends State<WorkoutScreen> {
   bool _saving = false;
+  late List<_ContentRow> _rows;
+
+  @override
+  void initState() {
+    List<String> _contentList = widget._workout.sets > 0
+        ? widget._workout.content.split(Workout.setSeparator)
+        : [];
+    _rows = List<_ContentRow>.generate(
+      _contentList.length,
+      (index) {
+        return _ContentRow(
+            index, _contentList.length, _contentList[index], _swapRows);
+      },
+    );
+  }
+
+  void _swapRows(int index, int direction) {
+    _ContentRow temp = _rows[index];
+    int targetIndex = index + direction;
+    int rowsLength = _rows.length;
+    setState(() {
+      _rows[index] = _rows[targetIndex];
+      _rows[targetIndex] = temp;
+      _rows[index].setIndex(index, rowsLength);
+      _rows[targetIndex].setIndex(targetIndex, rowsLength);
+    });
+  }
+
+  String? _extractContentFromWidget() {
+    String sets = "";
+    for (int i = 0; i < _rows.length; i++) {
+      String? rowContent = _rows[i].weightAndReps;
+      if (rowContent == null) {
+        return null;
+      }
+      sets += "$rowContent${Workout.setSeparator}";
+    }
+    if (sets.isNotEmpty && sets[sets.length - 1] == Workout.setSeparator) {
+      sets = sets.substring(0, sets.length - 1);
+    }
+    if (!Workout.validateContent(sets)) {
+      return null;
+    }
+    return sets;
+  }
 
   Widget _saveButton(context) {
     return navigationBarTextButton(context, "Save", () async {
       setState(() {
         _saving = true;
       });
+
+      String? content = _extractContentFromWidget();
+      print("Cont: $content");
+
+      if (content == null) {
+        await showCupertinoDialog(
+          context: context,
+          builder: (buildContext) => quickAlertDialog(
+              buildContext,
+              "Error Saving",
+              "Please fill in the details of each set.",
+              "Dismiss"),
+        );
+        setState(() {
+          _saving = false;
+        });
+        return;
+      }
+
       Workout originalWorkout = widget._workout;
       Workout updatedWorkout = Workout(
         originalWorkout.id,
         widget._exercises[widget._selectedIndex].id,
-        originalWorkout.content,
+        content,
       );
 
       bool updated =
@@ -51,9 +217,10 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
         Navigator.pop(context, true);
       } else {
         showCupertinoDialog(
-            context: context,
-            builder: (buildContext) => quickAlertDialog(buildContext,
-                "Error Saving", "Failed to create the session.", "Dismiss"));
+          context: context,
+          builder: (buildContext) => quickAlertDialog(buildContext,
+              "Error Saving", "Failed to save the session.", "Dismiss"),
+        );
       }
 
       setState(() {
@@ -63,34 +230,66 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
   }
 
   Widget _exercisePickerItem(Exercise exercise) {
-    return Text(exercise.name);
+    return Text(exercise.name, style: Styles.exercisePicker(context));
   }
 
   Widget _exercisePicker() {
-    return Container(
-        height: 100,
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Styles.exercisePickerBackground(context),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        height: 120,
         child: CupertinoPicker(
             scrollController: widget._scrollController,
-            itemExtent: 40,
+            itemExtent: 28,
             onSelectedItemChanged: (int selectedIndex) {
               widget._selectedIndex = selectedIndex;
             },
             children:
-                widget._exercises.map((e) => _exercisePickerItem(e)).toList()));
+                widget._exercises.map((e) => _exercisePickerItem(e)).toList()),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
+      backgroundColor: Styles.defaultBackground(context),
       navigationBar: CupertinoNavigationBar(
         middle: navigationBarTitle(context, "Workout Details"),
         trailing: _saveButton(context),
       ),
       child: SafeArea(
         top: true,
-        child: Container(
-          color: Styles.defaultBackground(context),
-          child: ListView(children: [_exercisePicker()]),
+        child: Column(
+          children: [
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 8, top: 8),
+                child: Text("Select Exercise:",
+                    style: Styles.workoutScreenLabels(context)),
+              ),
+            ),
+            _exercisePicker(),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 8, top: 8),
+                child:
+                    Text("Content", style: Styles.workoutScreenLabels(context)),
+              ),
+            ),
+            Expanded(
+              child: ListView(
+                children: List<Widget>.generate(
+                    _rows.length, (int index) => _rows[index]),
+              ),
+            ),
+          ],
         ),
       ),
     );

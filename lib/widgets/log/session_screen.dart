@@ -88,7 +88,7 @@ class _SessionScreenState extends State<SessionScreen> {
 
   Widget _newWorkoutButton() {
     return GestureDetector(
-      child: Icon(CupertinoIcons.add_circled),
+      child: const Icon(CupertinoIcons.add_circled),
       onTap: () async {
         Workout newWorkout = Workout.blankWorkout();
 
@@ -99,24 +99,6 @@ class _SessionScreenState extends State<SessionScreen> {
         }
       },
     );
-    //return navigationBarTextButton(
-    //  context,
-    //  "New Workout",
-    //  () async {
-    //    Workout newWorkout = Workout.blankWorkout();
-
-    //    bool created =
-    //        await APIService.createWorkout(widget._session, newWorkout);
-    //    if (created) {
-    //      _loadWorkouts();
-    //    }
-    //    //CupertinoPageRoute workoutPageRoute = CupertinoPageRoute(
-    //    //    builder: (buildContext) =>
-    //    //        WorkoutScreen(null, widget._exerciseMap));
-    //    //dynamic createdWorkout =
-    //    //    await Navigator.push(context, workoutPageRoute);
-    //  },
-    //);
   }
 
   @override
@@ -135,7 +117,6 @@ class _SessionScreenState extends State<SessionScreen> {
                     _infoSection(context),
                   ] +
                   _workouts.map((Workout wo) {
-                    Exercise? exercise = widget._exerciseMap[wo.exerciseId];
                     return WorkoutListItem(
                         widget._session,
                         wo,

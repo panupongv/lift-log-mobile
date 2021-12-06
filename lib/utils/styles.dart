@@ -43,6 +43,9 @@ abstract class Styles {
   static Color sessionInfoBackground(context) =>
       _dynamicColor(context, CupertinoColors.white, CupertinoColors.black);
 
+  static Color exercisePickerBackground(context) =>
+      _dynamicColor(context, CupertinoColors.white, CupertinoColors.black);
+
   // TextStyles
 
   static const String _defaultFontFamily = 'SFPro';
@@ -101,7 +104,7 @@ abstract class Styles {
   static TextStyle cautiousDialogAction(context, isActive) => TextStyle(
       color: isActive ? cautiousActionColor(context) : _dynamicGrey(context));
 
-
+  // Log Tab TextStyles
 
   static TextStyle sessionListItemHeader(context) => TextStyle(
       fontFamily: _defaultFontFamily,
@@ -140,8 +143,17 @@ abstract class Styles {
       fontSize: 14,
       color: _dynamicGrey(context));
 
+  static TextStyle workoutScreenLabels(context) => TextStyle(
+      fontFamily: _defaultFontFamily,
+      fontSize: 17,
+      color: _defaultText(context));
 
+  static TextStyle exercisePicker(context) => TextStyle(
+      fontFamily: _defaultFontFamily,
+      fontSize: 21,
+      color: _defaultText(context));
 
+  // Exercise Tab TextStyles
 
   static TextStyle exerciseItemHeader(context) => TextStyle(
       fontFamily: _defaultFontFamily,

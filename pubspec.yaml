@@ -39,6 +39,7 @@ dependencies:
   dartz: ^0.10.0
   flutter_dotenv: ^5.0.2
   intl: ^0.17.0
+  reorderables: ^0.4.2
 
 
 dev_dependencies:

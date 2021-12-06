@@ -67,7 +67,6 @@ class _WorkoutListItemState extends State<WorkoutListItem> {
                       if (deleted) {
                         widget._reloadWorkouts();
                         Navigator.pop(context);
-                        Navigator.pop(context);
                       }
                       setState(() {
                         deleting = false;

@@ -15,7 +15,7 @@ class Workout {
   String get content => _content;
   int get sets => _content == ""? 0 : _content.split(setSeparator).length;
 
-  static bool _validateContent(String content) {
+  static bool validateContent(String content) {
     if (content.isEmpty) return true;
     List<String> sets = content.split(setSeparator);
     for (String setString in sets) {
@@ -47,7 +47,7 @@ class Workout {
   }
 
   set content(String content) {
-    if (_validateContent(content)) _content = content;
+    if (validateContent(content)) _content = content;
   }
 
 }
