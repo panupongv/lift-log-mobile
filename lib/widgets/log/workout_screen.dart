@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:liftlogmobile/models/exercise.dart';
 import 'package:liftlogmobile/models/session.dart';
 import 'package:liftlogmobile/models/workout.dart';
@@ -7,7 +8,6 @@ import 'package:liftlogmobile/services/api_service.dart';
 import 'package:liftlogmobile/utils/styles.dart';
 import 'package:liftlogmobile/widgets/shared/navigation_bar_text.dart';
 import 'package:liftlogmobile/widgets/shared/quick_dialog.dart';
-import 'package:reorderables/reorderables.dart';
 
 class WorkoutScreen extends StatefulWidget {
   final Session _session;
@@ -90,6 +90,9 @@ class _ContentRow extends StatelessWidget {
                 width: 50,
                 child: CupertinoTextField(
                   keyboardType: TextInputType.number,
+                  inputFormatters: <TextInputFormatter>[
+                    FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+                  ],
                   controller: _repsTextController,
                 ),
               ),
@@ -195,7 +198,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
           builder: (buildContext) => quickAlertDialog(
               buildContext,
               "Error Saving",
-              "Please fill in the details of each set.",
+              "Please fill in the valid details for each set.",
               "Dismiss"),
         );
         setState(() {
@@ -254,6 +257,41 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
     );
   }
 
+  Widget _addSetButton() {
+    return Container(
+      alignment: Alignment.center,
+      child: Padding(
+        padding: const EdgeInsets.only(top: 4, bottom: 8),
+        child: GestureDetector(
+          child: Container(
+            decoration: BoxDecoration(
+              color: Styles.listItemBackground(context),
+              borderRadius: const BorderRadius.all(Radius.circular(8)),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 15),
+              child: Text(
+                "Add Set",
+                style: Styles.addSetButton(context),
+              ),
+            ),
+          ),
+          onTap: () {
+            _ContentRow newRow = _ContentRow(
+              _rows.length,
+              _rows.length + 1,
+              Workout.weightRepsSeparator,
+              _swapRows,
+            );
+            setState(() {
+              _rows += [newRow];
+            });
+          },
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
@@ -286,7 +324,10 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
             Expanded(
               child: ListView(
                 children: List<Widget>.generate(
-                    _rows.length, (int index) => _rows[index]),
+                      _rows.length,
+                      (int index) => _rows[index],
+                    ) +
+                    [_addSetButton()],
               ),
             ),
           ],

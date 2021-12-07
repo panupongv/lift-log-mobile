@@ -212,13 +212,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "4.2.3"
-  reorderables:
-    dependency: "direct main"
-    description:
-      name: reorderables
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.4.2"
   shared_preferences:
     dependency: "direct main"
     description:

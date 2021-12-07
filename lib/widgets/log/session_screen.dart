@@ -27,12 +27,9 @@ class _SessionScreenState extends State<SessionScreen> {
     _loadWorkouts();
   }
 
-  void _createWorkout() async {}
-
   void _loadWorkouts() async {
     List<Workout> loadedWorkouts =
         await APIService.getWorkouts(widget._session);
-    print(loadedWorkouts);
     setState(() {
       _workouts = loadedWorkouts;
     });
