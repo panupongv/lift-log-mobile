@@ -49,16 +49,22 @@ class _ContentRow extends StatelessWidget {
     setIndex(_index, listSize);
   }
 
+  _ContentRow clone() =>
+      _ContentRow(_index, 0, _rawWeightAndReps(), _swapCallback);
+
   void setIndex(int newIndex, int listSize) {
     _index = newIndex;
     _isMoveUpAvailable = _index > 0;
     _isMoveDownAvailable = _index < listSize - 1;
   }
 
+  String _rawWeightAndReps() =>
+      "${_weightTextController.text}${Workout.weightRepsSeparator}${_repsTextController.text}";
+
   String? get weightAndReps {
     if (_weightTextController.text.isNotEmpty &&
         _repsTextController.text.isNotEmpty) {
-      return "${_weightTextController.text}${Workout.weightRepsSeparator}${_repsTextController.text}";
+      return _rawWeightAndReps();
     }
   }
 
@@ -277,15 +283,21 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
             ),
           ),
           onTap: () {
+            if (_rows.isNotEmpty) {
+              int previousLastIndex = _rows.length - 1;
+              _ContentRow previousLastRow = _rows[previousLastIndex].clone();
+              previousLastRow.setIndex(previousLastIndex, _rows.length + 1);
+              setState(() {
+                _rows[previousLastIndex] = previousLastRow;
+              });
+            }
             _ContentRow newRow = _ContentRow(
               _rows.length,
               _rows.length + 1,
               Workout.weightRepsSeparator,
               _swapRows,
             );
-            setState(() {
-              _rows += [newRow];
-            });
+            _rows += [newRow];
           },
         ),
       ),
@@ -327,7 +339,8 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                       _rows.length,
                       (int index) => _rows[index],
                     ) +
-                    [_addSetButton()],
+                    //children: _rows.map((e){return (Widget)e;}).toList() +
+                    <Widget>[_addSetButton()],
               ),
             ),
           ],
