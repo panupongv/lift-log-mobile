@@ -9,39 +9,18 @@ import 'package:liftlogmobile/utils/styles.dart';
 import 'package:liftlogmobile/widgets/shared/navigation_bar_text.dart';
 import 'package:liftlogmobile/widgets/shared/quick_dialog.dart';
 
-class WorkoutScreen extends StatefulWidget {
-  final Session _session;
-  final Workout _workout;
-  final Map<String, Exercise> _exerciseMap;
-  List<Exercise> _exercises = [];
-  int _selectedIndex = 0;
-  FixedExtentScrollController _scrollController = FixedExtentScrollController();
-
-  WorkoutScreen(this._session, this._workout, this._exerciseMap) {
-    _exercises = [Exercise(Workout.defaultIdReference, "None")] +
-        _exerciseMap.values.toList();
-    int index =
-        _exercises.indexWhere((element) => element.id == _workout.exerciseId);
-    _selectedIndex = index == -1 ? 0 : index;
-    _scrollController =
-        FixedExtentScrollController(initialItem: _selectedIndex);
-  }
-
-  @override
-  State<WorkoutScreen> createState() => _WorkoutScreenState();
-}
-
 class _ContentRow extends StatelessWidget {
   int _index;
   bool _isMoveUpAvailable = true;
   bool _isMoveDownAvailable = true;
   final Function _swapCallback;
+  final Function _removeRowCallback;
 
   final TextEditingController _weightTextController = TextEditingController();
   final TextEditingController _repsTextController = TextEditingController();
 
-  _ContentRow(
-      this._index, int listSize, String weightAndReps, this._swapCallback) {
+  _ContentRow(this._index, int listSize, String weightAndReps,
+      this._swapCallback, this._removeRowCallback) {
     List<String> weightAndRepsSplit =
         weightAndReps.split(Workout.weightRepsSeparator);
     _weightTextController.text = weightAndRepsSplit[0];
@@ -49,8 +28,8 @@ class _ContentRow extends StatelessWidget {
     setIndex(_index, listSize);
   }
 
-  _ContentRow clone() =>
-      _ContentRow(_index, 0, _rawWeightAndReps(), _swapCallback);
+  _ContentRow clone() => _ContentRow(
+      _index, 0, _rawWeightAndReps(), _swapCallback, _removeRowCallback);
 
   void setIndex(int newIndex, int listSize) {
     _index = newIndex;
@@ -58,6 +37,7 @@ class _ContentRow extends StatelessWidget {
     _isMoveDownAvailable = _index < listSize - 1;
   }
 
+  String deb() => "$_index $_isMoveUpAvailable $_isMoveDownAvailable";
   String _rawWeightAndReps() =>
       "${_weightTextController.text}${Workout.weightRepsSeparator}${_repsTextController.text}";
 
@@ -80,58 +60,90 @@ class _ContentRow extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 4, top: 4, bottom: 4),
-              child: SizedBox(
-                width: 50,
-                child: CupertinoTextField(
-                  keyboardType: TextInputType.number,
-                  controller: _weightTextController,
+            Row(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 4, top: 4, bottom: 4),
+                  child: SizedBox(
+                    //height: 30,
+                    width: 50,
+                    child: CupertinoTextField(
+                      keyboardType: TextInputType.number,
+                      controller: _weightTextController,
+                    ),
+                  ),
                 ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(left: 4, top: 4, bottom: 4),
-              child: SizedBox(
-                width: 50,
-                child: CupertinoTextField(
-                  keyboardType: TextInputType.number,
-                  inputFormatters: <TextInputFormatter>[
-                    FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
-                  ],
-                  controller: _repsTextController,
+                Padding(
+                  padding: const EdgeInsets.only(left: 4, right: 12),
+                  child: Text("kg", style: Styles.contentRowLabel(context),),
                 ),
-              ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 4, top: 4, bottom: 4),
+                  child: SizedBox(
+                    width: 50,
+                    child: CupertinoTextField(
+                      keyboardType: TextInputType.number,
+                      inputFormatters: <TextInputFormatter>[
+                        FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+                      ],
+                      controller: _repsTextController,
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 4, right: 8),
+                  child: Text("reps", style: Styles.contentRowLabel(context),),
+                ),
+              ],
             ),
             Row(
-              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                GestureDetector(
-                  child: Icon(
-                    CupertinoIcons.up_arrow,
-                    color: _isMoveUpAvailable
-                        ? Styles.activeColor(context)
-                        : Styles.inactiveColor(context),
-                  ),
-                  onTap: () {
-                    if (_isMoveUpAvailable) {
-                      _swapCallback(_index, -1);
-                    }
-                  },
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(3.0),
+                      child: GestureDetector(
+                        child: Icon(
+                          CupertinoIcons.chevron_up,
+                          color: _isMoveUpAvailable
+                              ? Styles.activeColor(context)
+                              : Styles.inactiveColor(context),
+                        ),
+                        onTap: () {
+                          if (_isMoveUpAvailable) {
+                            _swapCallback(_index, -1);
+                          }
+                        },
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(3.0),
+                      child: GestureDetector(
+                        child: Icon(
+                          CupertinoIcons.chevron_down,
+                          color: _isMoveDownAvailable
+                              ? Styles.activeColor(context)
+                              : Styles.inactiveColor(context),
+                        ),
+                        onTap: () {
+                          if (_isMoveDownAvailable) {
+                            _swapCallback(_index, 1);
+                          }
+                        },
+                      ),
+                    ),
+                  ],
                 ),
-                GestureDetector(
-                  child: Icon(
-                    CupertinoIcons.down_arrow,
-                    color: _isMoveDownAvailable
-                        ? Styles.activeColor(context)
-                        : Styles.inactiveColor(context),
+                Padding(
+                  padding: const EdgeInsets.only(left: 4, right: 6),
+                  child: GestureDetector(
+                    child: const Icon(CupertinoIcons.delete),
+                    onTap: () {
+                      _removeRowCallback(_index);
+                    },
                   ),
-                  onTap: () {
-                    if (_isMoveDownAvailable) {
-                      _swapCallback(_index, 1);
-                    }
-                  },
-                ),
+                )
               ],
             ),
           ],
@@ -141,8 +153,31 @@ class _ContentRow extends StatelessWidget {
   }
 }
 
+class WorkoutScreen extends StatefulWidget {
+  final Session _session;
+  final Workout _workout;
+  final Map<String, Exercise> _exerciseMap;
+  List<Exercise> _exercises = [];
+  int _selectedIndex = 0;
+  FixedExtentScrollController _scrollController = FixedExtentScrollController();
+
+  WorkoutScreen(this._session, this._workout, this._exerciseMap) {
+    _exercises = [Exercise(Workout.defaultIdReference, "None")] +
+        _exerciseMap.values.toList();
+    int index =
+        _exercises.indexWhere((element) => element.id == _workout.exerciseId);
+    _selectedIndex = index == -1 ? 0 : index;
+    _scrollController =
+        FixedExtentScrollController(initialItem: _selectedIndex);
+  }
+
+  @override
+  State<WorkoutScreen> createState() => _WorkoutScreenState();
+}
+
 class _WorkoutScreenState extends State<WorkoutScreen> {
   bool _saving = false;
+  bool _savedAtLeastOnce = false;
   late List<_ContentRow> _rows;
 
   @override
@@ -153,8 +188,8 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
     _rows = List<_ContentRow>.generate(
       _contentList.length,
       (index) {
-        return _ContentRow(
-            index, _contentList.length, _contentList[index], _swapRows);
+        return _ContentRow(index, _contentList.length, _contentList[index],
+            _swapRows, _removeRow);
       },
     );
   }
@@ -171,22 +206,40 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
     });
   }
 
+  void _removeRow(int index) {
+    setState(() {
+      _rows.removeAt(index);
+    });
+
+    List<_ContentRow> updatedRows = [];
+    int rowsLength = _rows.length;
+    for (int i = 0; i < _rows.length; i++) {
+      _ContentRow updatedRow = _rows[i].clone();
+      updatedRow.setIndex(i, rowsLength);
+      updatedRows.add(updatedRow);
+    }
+    setState(() {
+      _rows = updatedRows;
+    });
+  }
+
   String? _extractContentFromWidget() {
-    String sets = "";
+    String setsString = "";
     for (int i = 0; i < _rows.length; i++) {
       String? rowContent = _rows[i].weightAndReps;
       if (rowContent == null) {
         return null;
       }
-      sets += "$rowContent${Workout.setSeparator}";
+      setsString += "$rowContent${Workout.setSeparator}";
     }
-    if (sets.isNotEmpty && sets[sets.length - 1] == Workout.setSeparator) {
-      sets = sets.substring(0, sets.length - 1);
+    if (setsString.isNotEmpty &&
+        setsString[setsString.length - 1] == Workout.setSeparator) {
+      setsString = setsString.substring(0, setsString.length - 1);
     }
-    if (!Workout.validateContent(sets)) {
+    if (!Workout.validateContent(setsString)) {
       return null;
     }
-    return sets;
+    return setsString;
   }
 
   Widget _saveButton(context) {
@@ -196,7 +249,6 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
       });
 
       String? content = _extractContentFromWidget();
-      print("Cont: $content");
 
       if (content == null) {
         await showCupertinoDialog(
@@ -223,7 +275,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
       bool updated =
           await APIService.updateWorkout(widget._session, updatedWorkout);
       if (updated) {
-        Navigator.pop(context, true);
+        _savedAtLeastOnce = true;
       } else {
         showCupertinoDialog(
           context: context,
@@ -252,13 +304,14 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
         ),
         height: 120,
         child: CupertinoPicker(
-            scrollController: widget._scrollController,
-            itemExtent: 28,
-            onSelectedItemChanged: (int selectedIndex) {
-              widget._selectedIndex = selectedIndex;
-            },
-            children:
-                widget._exercises.map((e) => _exercisePickerItem(e)).toList()),
+          scrollController: widget._scrollController,
+          itemExtent: 28,
+          onSelectedItemChanged: (int selectedIndex) {
+            widget._selectedIndex = selectedIndex;
+          },
+          children:
+              widget._exercises.map((e) => _exercisePickerItem(e)).toList(),
+        ),
       ),
     );
   }
@@ -291,13 +344,11 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                 _rows[previousLastIndex] = previousLastRow;
               });
             }
-            _ContentRow newRow = _ContentRow(
-              _rows.length,
-              _rows.length + 1,
-              Workout.weightRepsSeparator,
-              _swapRows,
-            );
-            _rows += [newRow];
+            _ContentRow newRow = _ContentRow(_rows.length, _rows.length + 1,
+                Workout.weightRepsSeparator, _swapRows, _removeRow);
+            setState(() {
+              _rows += [newRow];
+            });
           },
         ),
       ),

@@ -21,6 +21,8 @@ class SessionScreen extends StatefulWidget {
 
 class _SessionScreenState extends State<SessionScreen> {
   List<Workout> _workouts = [];
+  bool _addingWorkout = false;
+  bool _loadingInitialList = true;
 
   @override
   void initState() {
@@ -32,6 +34,7 @@ class _SessionScreenState extends State<SessionScreen> {
         await APIService.getWorkouts(widget._session);
     setState(() {
       _workouts = loadedWorkouts;
+      _loadingInitialList = false;
     });
   }
 
@@ -85,15 +88,27 @@ class _SessionScreenState extends State<SessionScreen> {
 
   Widget _newWorkoutButton() {
     return GestureDetector(
-      child: const Icon(CupertinoIcons.add_circled),
+      child: Icon(
+        CupertinoIcons.add_circled,
+        color: _addingWorkout
+            ? Styles.inactiveColor(context)
+            : Styles.activeColor(context),
+      ),
       onTap: () async {
-        Workout newWorkout = Workout.blankWorkout();
+        if (_addingWorkout) return;
 
+        setState(() {
+          _addingWorkout = true;
+        });
+        Workout newWorkout = Workout.blankWorkout();
         bool created =
             await APIService.createWorkout(widget._session, newWorkout);
         if (created) {
           _loadWorkouts();
         }
+        setState(() {
+          _addingWorkout = false;
+        });
       },
     );
   }
@@ -113,13 +128,17 @@ class _SessionScreenState extends State<SessionScreen> {
               children: [
                     _infoSection(context),
                   ] +
-                  _workouts.map((Workout wo) {
-                    return WorkoutListItem(
-                        widget._session,
-                        wo,
-                        widget._exerciseMap,
-                        _loadWorkouts);
-                  }).toList()),
+                  (_loadingInitialList
+                      ? [
+                          Container(
+                            height: 15,
+                          ),
+                          const CupertinoActivityIndicator()
+                        ]
+                      : _workouts.map((Workout wo) {
+                          return WorkoutListItem(widget._session, wo,
+                              widget._exerciseMap, _loadWorkouts);
+                        }).toList())),
         ),
       ),
     );

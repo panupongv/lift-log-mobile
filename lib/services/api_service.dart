@@ -229,7 +229,6 @@ class APIService {
           "content": workout.content
         }));
 
-    print(response.body);
     return response.statusCode == HttpStatus.ok;
   }
 
@@ -243,7 +242,6 @@ class APIService {
       headers: jsonHeaderWithAuthToken(user),
     );
 
-    print(response.body);
     return response.statusCode == HttpStatus.ok;
   }
 }

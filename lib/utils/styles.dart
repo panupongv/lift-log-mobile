@@ -153,6 +153,11 @@ abstract class Styles {
       fontSize: 21,
       color: _defaultText(context));
 
+  static TextStyle contentRowLabel(context) => TextStyle(
+      fontFamily: _defaultFontFamily,
+      fontSize: 17,
+      color: _defaultText(context));
+
   static TextStyle addSetButton(context) => TextStyle(
       fontFamily: _defaultFontFamily,
       fontSize: 17,

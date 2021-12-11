@@ -20,7 +20,6 @@ class WorkoutListItem extends StatefulWidget {
 }
 
 class _WorkoutListItemState extends State<WorkoutListItem> {
-
   String _getExerciseName() {
     String exerciseId = widget._workout.exerciseId;
     if (exerciseId == Workout.defaultIdReference) {
@@ -89,10 +88,8 @@ class _WorkoutListItemState extends State<WorkoutListItem> {
         CupertinoPageRoute workoutPageRoute = CupertinoPageRoute(
             builder: (buildContext) => WorkoutScreen(
                 widget._session, widget._workout, widget._exerciseMap));
-        dynamic workoutSaved = await Navigator.push(context, workoutPageRoute);
-        if (workoutSaved != null && workoutSaved is bool && workoutSaved) {
-          widget._reloadWorkouts();
-        }
+        await Navigator.push(context, workoutPageRoute);
+        widget._reloadWorkouts();
       },
       child: Padding(
         padding: const EdgeInsets.only(top: 15, left: 10, right: 10),
