@@ -17,12 +17,10 @@ class Session {
   }
 
   set date(DateTime newDate) {
-    assert(newDate != null);
     _date = newDate;
   }
 
   set location(String newLocation) {
-    assert(newLocation.isNotEmpty);
     _location = newLocation;
   }
 

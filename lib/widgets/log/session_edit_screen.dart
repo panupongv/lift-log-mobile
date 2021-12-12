@@ -36,6 +36,24 @@ class _SessionEditScreenState extends State<SessionEditScreen> {
     EdgeInsets labelInsets = const EdgeInsets.only(left: 8, top: 20);
     EdgeInsets fieldInsets = const EdgeInsets.only(left: 8, right: 8, top: 8);
 
+    Widget _datePicker() => Padding(
+          padding: const EdgeInsets.only(left: 10, right: 10, top: 8),
+          child: Container(
+            height: 200,
+            decoration: BoxDecoration(
+              color: Styles.datePicker(context),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: CupertinoDatePicker(
+              mode: CupertinoDatePickerMode.date,
+              initialDateTime: _selectedDate,
+              onDateTimeChanged: (DateTime newDate) {
+                _selectedDate = newDate;
+              },
+            ),
+          ),
+        );
+
     return CupertinoPageScaffold(
       backgroundColor: Styles.defaultBackground(context),
       navigationBar: CupertinoNavigationBar(
@@ -136,23 +154,7 @@ class _SessionEditScreenState extends State<SessionEditScreen> {
               padding: labelInsets,
               child: Text("Date", style: Styles.editSessionLabels(context)),
             ),
-            Padding(
-              padding: const EdgeInsets.only(left: 10, right: 10, top: 8),
-              child: Container(
-                height: 200,
-                decoration: BoxDecoration(
-                  color: Styles.datePicker(context),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: CupertinoDatePicker(
-                  mode: CupertinoDatePickerMode.date,
-                  initialDateTime: _selectedDate,
-                  onDateTimeChanged: (DateTime newDate) {
-                    _selectedDate = newDate;
-                  },
-                ),
-              ),
-            ),
+            _datePicker(),
           ],
         ),
       ),

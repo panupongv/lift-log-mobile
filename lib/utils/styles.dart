@@ -40,6 +40,12 @@ abstract class Styles {
   static Color datePicker(context) =>
       _dynamicColor(context, CupertinoColors.white, CupertinoColors.black);
 
+  static Color sessionInfoBackground(context) =>
+      _dynamicColor(context, CupertinoColors.white, CupertinoColors.black);
+
+  static Color exercisePickerBackground(context) =>
+      _dynamicColor(context, CupertinoColors.white, CupertinoColors.black);
+
   // TextStyles
 
   static const String _defaultFontFamily = 'SFPro';
@@ -78,25 +84,21 @@ abstract class Styles {
   }
 
   static TextStyle navigationBarTitle(context) => TextStyle(
-        fontFamily: 'SFPro',
+        fontFamily: _defaultFontFamily,
         fontSize: 17,
         color: _defaultText(context),
       );
 
-  static TextStyle navigationBarTextActive(context) => TextStyle(
-        fontFamily: 'SFPro',
-        color: activeColor(context),
-        fontSize: 17,
-      );
-
-  static TextStyle navigationBarTextInactive(context) => TextStyle(
-        fontFamily: 'SFPro',
-        color: _dynamicGrey(context),
+  static TextStyle navigationBarText(context, {isActive = true}) => TextStyle(
+        fontFamily: _defaultFontFamily,
+        color: isActive ? activeColor(context) : inactiveColor(context),
         fontSize: 17,
       );
 
   static TextStyle cautiousDialogAction(context, isActive) => TextStyle(
       color: isActive ? cautiousActionColor(context) : _dynamicGrey(context));
+
+  // Log Tab TextStyles
 
   static TextStyle sessionListItemHeader(context) => TextStyle(
       fontFamily: _defaultFontFamily,
@@ -114,10 +116,59 @@ abstract class Styles {
       fontSize: 17,
       color: _defaultText(context));
 
+  // Session Edit Screen TextStyles
+
   static TextStyle editSessionLabels(context) => TextStyle(
       fontFamily: _defaultFontFamily,
       fontSize: 17,
       color: _defaultText(context));
+
+  // Session Screen TextStyles
+
+  static TextStyle sessionPageInfo(context) => TextStyle(
+      fontFamily: _defaultFontFamily,
+      fontSize: 17,
+      color: _defaultText(context));
+
+  static TextStyle workoutListItemHeader(context) => TextStyle(
+      fontFamily: _defaultFontFamily,
+      fontSize: 17,
+      fontWeight: FontWeight.bold,
+      color: _defaultText(context));
+
+  static TextStyle workoutListItemDetails(context) => TextStyle(
+      fontFamily: _defaultFontFamily,
+      fontSize: 14,
+      color: _dynamicGrey(context));
+
+  // Workout Screen TextStyles
+
+  static TextStyle workoutScreenLabels(context) => TextStyle(
+      fontFamily: _defaultFontFamily,
+      fontSize: 17,
+      color: _defaultText(context));
+
+  static TextStyle exercisePicker(context) => TextStyle(
+      fontFamily: _defaultFontFamily,
+      fontSize: 21,
+      color: _defaultText(context));
+
+  static TextStyle historyButton(context, isActive) => TextStyle(
+      fontFamily: _defaultFontFamily,
+      fontSize: 17,
+      color: isActive ? activeColor(context) : inactiveColor(context));
+
+  static TextStyle contentRowLabel(context) => TextStyle(
+      fontFamily: _defaultFontFamily,
+      fontSize: 17,
+      color: _defaultText(context));
+
+  static TextStyle addSetButton(context) => TextStyle(
+      fontFamily: _defaultFontFamily,
+      fontSize: 17,
+      color: _defaultText(context));
+
+  // Exercise Tab TextStyles
 
   static TextStyle exerciseItemHeader(context) => TextStyle(
       fontFamily: _defaultFontFamily,
