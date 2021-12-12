@@ -54,6 +54,7 @@ class _ExerciseLibraryTabState extends State<ExerciseLibraryTab> {
   }
 
   Widget _logoutButton(BuildContext context) {
+    bool loggingOut = false;
     return navigationBarTextButton(
       context,
       "Logout",
@@ -83,13 +84,19 @@ class _ExerciseLibraryTabState extends State<ExerciseLibraryTab> {
                 CupertinoDialogAction(
                   child: Text(
                     "Logout",
-                    style: Styles.dialogActionCrucial(context),
+                    style: Styles.cautiousDialogAction(context, !loggingOut)
                   ),
                   onPressed: () async {
+                    setState(() {
+                      loggingOut = true;  
+                    });
                     await LocalStorageService.removeSavedUser();
                     CupertinoPageRoute backToLoginRoute =
                         CupertinoPageRoute(builder: (context) => LoginScreen());
                     Navigator.pushReplacement(context, backToLoginRoute);
+                    setState(() {
+                      loggingOut = false;  
+                    });
                   },
                 ),
               ],

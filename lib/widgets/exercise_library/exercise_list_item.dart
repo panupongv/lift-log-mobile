@@ -57,11 +57,18 @@ class _EditExerciseDialog extends StatelessWidget {
   }
 }
 
-class _DeleteExerciseDialog extends StatelessWidget {
+class _DeleteExerciseDialog extends StatefulWidget {
   final Exercise _exercise;
   final Function _reloadExercises;
 
-  const _DeleteExerciseDialog(this._exercise, this._reloadExercises);
+  _DeleteExerciseDialog(this._exercise, this._reloadExercises);
+
+  @override
+  State<_DeleteExerciseDialog> createState() => _DeleteExerciseDialogState();
+}
+
+class _DeleteExerciseDialogState extends State<_DeleteExerciseDialog> {
+  bool _deleting = false;
 
   @override
   Widget build(BuildContext context) {
@@ -81,15 +88,23 @@ class _DeleteExerciseDialog extends StatelessWidget {
         CupertinoDialogAction(
           child: Text(
             "Delete",
-            style: Styles.dialogActionCrucial(context),
+            style: Styles.cautiousDialogAction(context, !_deleting),
           ),
           onPressed: () async {
-            bool deleted = await APIService.deleteExercise(_exercise);
+            if (_deleting) return;
+
+            setState(() {
+              _deleting = true;
+            });
+            bool deleted = await APIService.deleteExercise(widget._exercise);
             if (deleted) {
-              _reloadExercises();
+              widget._reloadExercises();
               Navigator.pop(context);
               Navigator.pop(context);
             }
+            setState(() {
+              _deleting = false;
+            });
           },
         )
       ],
