@@ -6,6 +6,7 @@ import 'package:liftlogmobile/models/session.dart';
 import 'package:liftlogmobile/models/workout.dart';
 import 'package:liftlogmobile/services/api_service.dart';
 import 'package:liftlogmobile/utils/styles.dart';
+import 'package:liftlogmobile/widgets/log/workout_history_screen.dart';
 import 'package:liftlogmobile/widgets/shared/navigation_bar_text.dart';
 import 'package:liftlogmobile/widgets/shared/quick_dialog.dart';
 
@@ -75,7 +76,10 @@ class _ContentRow extends StatelessWidget {
                 ),
                 Padding(
                   padding: const EdgeInsets.only(left: 4, right: 12),
-                  child: Text("kg", style: Styles.contentRowLabel(context),),
+                  child: Text(
+                    "kg",
+                    style: Styles.contentRowLabel(context),
+                  ),
                 ),
                 Padding(
                   padding: const EdgeInsets.only(left: 4, top: 4, bottom: 4),
@@ -92,7 +96,10 @@ class _ContentRow extends StatelessWidget {
                 ),
                 Padding(
                   padding: const EdgeInsets.only(left: 4, right: 8),
-                  child: Text("reps", style: Styles.contentRowLabel(context),),
+                  child: Text(
+                    "reps",
+                    style: Styles.contentRowLabel(context),
+                  ),
                 ),
               ],
             ),
@@ -254,10 +261,11 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
         await showCupertinoDialog(
           context: context,
           builder: (buildContext) => quickAlertDialog(
-              buildContext,
-              "Error Saving",
-              "Please fill in the valid details for each set.",
-              "Dismiss"),
+            buildContext,
+            "Error Saving",
+            "Please fill in the valid details for each set.",
+            "Dismiss",
+          ),
         );
         setState(() {
           _saving = false;
@@ -279,8 +287,12 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
       } else {
         showCupertinoDialog(
           context: context,
-          builder: (buildContext) => quickAlertDialog(buildContext,
-              "Error Saving", "Failed to save the session.", "Dismiss"),
+          builder: (buildContext) => quickAlertDialog(
+            buildContext,
+            "Error Saving",
+            "Failed to save the session.",
+            "Dismiss",
+          ),
         );
       }
 
@@ -307,12 +319,42 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
           scrollController: widget._scrollController,
           itemExtent: 28,
           onSelectedItemChanged: (int selectedIndex) {
-            widget._selectedIndex = selectedIndex;
+            setState(() {
+              widget._selectedIndex = selectedIndex;
+            });
+            print(widget._selectedIndex);
           },
           children:
               widget._exercises.map((e) => _exercisePickerItem(e)).toList(),
         ),
       ),
+    );
+  }
+
+  Widget _contentLabel() => Padding(
+        padding: const EdgeInsets.only(left: 8),
+        child: Text("Content", style: Styles.workoutScreenLabels(context)),
+      );
+
+  Widget _historyButton() {
+    bool available = widget._selectedIndex != 0;
+    return GestureDetector(
+      child: Padding(
+        padding: const EdgeInsets.only(right: 8),
+        child: Text("See History",
+            style: Styles.historyButton(context, available)),
+      ),
+      onTap: () async {
+        if (!available) return;
+        
+        print(widget._session.getDateInDatabaseFormat());
+        print(widget._exercises[widget._selectedIndex].id);
+        print(widget._exercises[widget._selectedIndex].name);
+
+        CupertinoPageRoute historyPageRoute = CupertinoPageRoute(
+            builder: (BuildContext context) => WorkoutHistoryScreen());
+        await Navigator.push(context, historyPageRoute);
+      },
     );
   }
 
@@ -376,12 +418,14 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
               ),
             ),
             _exercisePicker(),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Padding(
-                padding: const EdgeInsets.only(left: 8, top: 8),
-                child:
-                    Text("Content", style: Styles.workoutScreenLabels(context)),
+            Padding(
+              padding: const EdgeInsets.only(top: 8, bottom: 4),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _contentLabel(),
+                  _historyButton(),
+                ],
               ),
             ),
             Expanded(
@@ -390,7 +434,6 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                       _rows.length,
                       (int index) => _rows[index],
                     ) +
-                    //children: _rows.map((e){return (Widget)e;}).toList() +
                     <Widget>[_addSetButton()],
               ),
             ),

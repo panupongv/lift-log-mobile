@@ -84,20 +84,14 @@ abstract class Styles {
   }
 
   static TextStyle navigationBarTitle(context) => TextStyle(
-        fontFamily: 'SFPro',
+        fontFamily: _defaultFontFamily,
         fontSize: 17,
         color: _defaultText(context),
       );
 
-  static TextStyle navigationBarTextActive(context) => TextStyle(
-        fontFamily: 'SFPro',
-        color: activeColor(context),
-        fontSize: 17,
-      );
-
-  static TextStyle navigationBarTextInactive(context) => TextStyle(
-        fontFamily: 'SFPro',
-        color: _dynamicGrey(context),
+  static TextStyle navigationBarText(context, {isActive = true}) => TextStyle(
+        fontFamily: _defaultFontFamily,
+        color: isActive ? activeColor(context) : inactiveColor(context),
         fontSize: 17,
       );
 
@@ -122,12 +116,16 @@ abstract class Styles {
       fontSize: 17,
       color: _defaultText(context));
 
-  static TextStyle sessionPageInfo(context) => TextStyle(
+  // Session Edit Screen TextStyles
+
+  static TextStyle editSessionLabels(context) => TextStyle(
       fontFamily: _defaultFontFamily,
       fontSize: 17,
       color: _defaultText(context));
 
-  static TextStyle editSessionLabels(context) => TextStyle(
+  // Session Screen TextStyles
+
+  static TextStyle sessionPageInfo(context) => TextStyle(
       fontFamily: _defaultFontFamily,
       fontSize: 17,
       color: _defaultText(context));
@@ -143,6 +141,8 @@ abstract class Styles {
       fontSize: 14,
       color: _dynamicGrey(context));
 
+  // Workout Screen TextStyles
+
   static TextStyle workoutScreenLabels(context) => TextStyle(
       fontFamily: _defaultFontFamily,
       fontSize: 17,
@@ -152,6 +152,11 @@ abstract class Styles {
       fontFamily: _defaultFontFamily,
       fontSize: 21,
       color: _defaultText(context));
+
+  static TextStyle historyButton(context, isActive) => TextStyle(
+      fontFamily: _defaultFontFamily,
+      fontSize: 17,
+      color: isActive ? activeColor(context) : inactiveColor(context));
 
   static TextStyle contentRowLabel(context) => TextStyle(
       fontFamily: _defaultFontFamily,

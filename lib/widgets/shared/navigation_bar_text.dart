@@ -15,9 +15,7 @@ Widget navigationBarTextButton(
   return GestureDetector(
     child: Text(
       text,
-      style: isActive
-          ? Styles.navigationBarTextActive(context)
-          : Styles.navigationBarTextInactive(context),
+      style: Styles.navigationBarText(context, isActive: isActive),
     ),
     onTap: () {
       if (isActive) {
