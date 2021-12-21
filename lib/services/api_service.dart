@@ -244,4 +244,25 @@ class APIService {
 
     return response.statusCode == HttpStatus.ok;
   }
+
+  static Future<void> getHistory(
+      Session session, Exercise exercise, int offset) async {
+    User user = GlobalUser.user!;
+    Map<String, String> queryParams = {
+      'date': session.getDateInDatabaseFormat(),
+      'offset': offset.toString(),
+    };
+    final Uri url = Uri.parse("$_host/${user.username}/sessions/history/${exercise.id}" +
+        parameteriseQuery(queryParams));
+
+    Response response = await get(url, headers: jsonHeaderWithAuthToken(user));
+
+    dynamic json = jsonDecode(response.body);
+
+    print("\n\n\nOFFSET: $offset");
+    print("Selected Exercise: ${exercise.name}");
+    print("OLD: ${json['olderSession']}");
+    print("CURRENT: ${json['session']}");
+    print("NEW: ${json['newerSession']}");
+  }
 }

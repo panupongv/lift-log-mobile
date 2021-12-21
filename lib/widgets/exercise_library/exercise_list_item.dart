@@ -74,7 +74,7 @@ class _DeleteExerciseDialogState extends State<_DeleteExerciseDialog> {
   Widget build(BuildContext context) {
     return CupertinoAlertDialog(
       title: Text("Delete Exercise", style: Styles.dialogTitle(context)),
-      content: Text("Are you sure?", style: Styles.dialogContent(context)),
+      content: Text("Are you sure? This may cause glitches on exercise pickers.", style: Styles.dialogContent(context)),
       actions: <Widget>[
         CupertinoDialogAction(
           child: Text(

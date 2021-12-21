@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:liftlogmobile/models/exercise.dart';
@@ -166,14 +167,20 @@ class WorkoutScreen extends StatefulWidget {
   final Map<String, Exercise> _exerciseMap;
   List<Exercise> _exercises = [];
   int _selectedIndex = 0;
+  int _savedIndex = 0;
+
+  //String _selectedExId = "";
+  //String _savedExId = "";
+
   FixedExtentScrollController _scrollController = FixedExtentScrollController();
 
   WorkoutScreen(this._session, this._workout, this._exerciseMap) {
     _exercises = [Exercise(Workout.defaultIdReference, "None")] +
         _exerciseMap.values.toList();
-    int index =
+    int searchIndex =
         _exercises.indexWhere((element) => element.id == _workout.exerciseId);
-    _selectedIndex = index == -1 ? 0 : index;
+    int _selectedIndex = searchIndex == -1 ? 0 : searchIndex;
+    _savedIndex = _selectedIndex;
     _scrollController =
         FixedExtentScrollController(initialItem: _selectedIndex);
   }
@@ -184,7 +191,6 @@ class WorkoutScreen extends StatefulWidget {
 
 class _WorkoutScreenState extends State<WorkoutScreen> {
   bool _saving = false;
-  bool _savedAtLeastOnce = false;
   late List<_ContentRow> _rows;
 
   @override
@@ -273,17 +279,23 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
         return;
       }
 
+      final int currentSelectedIndex = widget._selectedIndex;
+
       Workout originalWorkout = widget._workout;
       Workout updatedWorkout = Workout(
         originalWorkout.id,
-        widget._exercises[widget._selectedIndex].id,
+        widget._exercises[currentSelectedIndex].id,
         content,
       );
 
-      bool updated =
-          await APIService.updateWorkout(widget._session, updatedWorkout);
+      bool updated = await APIService.updateWorkout(
+        widget._session,
+        updatedWorkout,
+      );
       if (updated) {
-        _savedAtLeastOnce = true;
+        setState(() {
+          widget._savedIndex = currentSelectedIndex;
+        });
       } else {
         showCupertinoDialog(
           context: context,
@@ -322,7 +334,6 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
             setState(() {
               widget._selectedIndex = selectedIndex;
             });
-            print(widget._selectedIndex);
           },
           children:
               widget._exercises.map((e) => _exercisePickerItem(e)).toList(),
@@ -337,22 +348,35 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
       );
 
   Widget _historyButton() {
-    bool available = widget._selectedIndex != 0;
+    bool available =
+        widget._savedIndex != 0 && widget._savedIndex == widget._selectedIndex;
     return GestureDetector(
       child: Padding(
         padding: const EdgeInsets.only(right: 8),
-        child: Text("See History",
-            style: Styles.historyButton(context, available)),
+        child: Text(
+          "See History",
+          style: Styles.historyButton(context, available),
+        ),
       ),
       onTap: () async {
-        if (!available) return;
-        
-        print(widget._session.getDateInDatabaseFormat());
-        print(widget._exercises[widget._selectedIndex].id);
-        print(widget._exercises[widget._selectedIndex].name);
+        if (!available) {
+          showCupertinoDialog(
+              context: context,
+              builder: (context) => quickAlertDialog(
+                  context,
+                  "Unable to see History",
+                  widget._savedIndex == 0
+                      ? "Please select a valid exercise and save to see the history."
+                      : "The exercise must be up to date to see the history.",
+                  "Dismiss"));
+          return;
+        }
 
         CupertinoPageRoute historyPageRoute = CupertinoPageRoute(
-            builder: (BuildContext context) => WorkoutHistoryScreen());
+            builder: (BuildContext context) => WorkoutHistoryScreen(
+                  widget._session,
+                  widget._exercises[widget._selectedIndex],
+                ));
         await Navigator.push(context, historyPageRoute);
       },
     );
