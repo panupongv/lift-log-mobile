@@ -125,6 +125,12 @@ abstract class Styles {
 
   // Session Screen TextStyles
 
+  static TextStyle sessionPageInfoBold(context) => TextStyle(
+      fontWeight: FontWeight.bold,
+      fontFamily: _defaultFontFamily,
+      fontSize: 17,
+      color: _defaultText(context));
+
   static TextStyle sessionPageInfo(context) => TextStyle(
       fontFamily: _defaultFontFamily,
       fontSize: 17,
@@ -166,6 +172,16 @@ abstract class Styles {
   static TextStyle addSetButton(context) => TextStyle(
       fontFamily: _defaultFontFamily,
       fontSize: 17,
+      color: _defaultText(context));
+
+  static TextStyle historyShiftButton(context) => TextStyle(
+      fontFamily: _defaultFontFamily,
+      fontSize: 15,
+      color: activeColor(context));
+
+  static TextStyle historyShiftInfo(context) => TextStyle(
+      fontFamily: _defaultFontFamily,
+      fontSize: 15,
       color: _defaultText(context));
 
   // Exercise Tab TextStyles

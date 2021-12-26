@@ -4,9 +4,8 @@ import 'package:liftlogmobile/models/session.dart';
 import 'package:liftlogmobile/models/workout.dart';
 import 'package:liftlogmobile/services/api_service.dart';
 import 'package:liftlogmobile/utils/styles.dart';
-import 'package:liftlogmobile/utils/text_utils.dart';
+import 'package:liftlogmobile/widgets/log/session_info_section.dart';
 import 'package:liftlogmobile/widgets/log/workout_list_item.dart';
-import 'package:liftlogmobile/widgets/log/workout_screen.dart';
 import 'package:liftlogmobile/widgets/shared/navigation_bar_text.dart';
 
 class SessionScreen extends StatefulWidget {
@@ -36,54 +35,6 @@ class _SessionScreenState extends State<SessionScreen> {
       _workouts = loadedWorkouts;
       _loadingInitialList = false;
     });
-  }
-
-  Widget _infoSection(context) {
-    return Container(
-      color: Styles.sessionInfoBackground(context),
-      height: 100,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 10, right: 5),
-                child: Icon(
-                  CupertinoIcons.calendar,
-                  color: Styles.iconGrey(context),
-                  size: 32,
-                ),
-              ),
-              Text(
-                "${widget._session.getDateInDisplayFormat()} (${widget._session.getDayOfWeek()})",
-                style: Styles.sessionPageInfo(context),
-              ),
-            ],
-          ),
-          Container(
-            height: 10,
-          ),
-          Row(
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 10, right: 5),
-                child: Icon(
-                  CupertinoIcons.location,
-                  color: Styles.iconGrey(context),
-                  size: 32,
-                ),
-              ),
-              Text(
-                TextUtils.trimOverflow(widget._session.location, 30),
-                style: Styles.sessionPageInfo(context),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
   }
 
   Widget _newWorkoutButton() {
@@ -125,20 +76,21 @@ class _SessionScreenState extends State<SessionScreen> {
         child: Container(
           color: Styles.defaultBackground(context),
           child: ListView(
-              children: [
-                    _infoSection(context),
-                  ] +
-                  (_loadingInitialList
-                      ? [
-                          Container(
-                            height: 15,
-                          ),
-                          const CupertinoActivityIndicator()
-                        ]
-                      : _workouts.map((Workout wo) {
-                          return WorkoutListItem(widget._session, wo,
-                              widget._exerciseMap, _loadWorkouts);
-                        }).toList())),
+            children: [
+                  sessionInfoSection(context, widget._session),
+                ] +
+                (_loadingInitialList
+                    ? [
+                        Container(
+                          height: 15,
+                        ),
+                        const CupertinoActivityIndicator()
+                      ]
+                    : _workouts.map((Workout wo) {
+                        return WorkoutListItem(widget._session, wo,
+                            widget._exerciseMap, _loadWorkouts);
+                      }).toList()),
+          ),
         ),
       ),
     );

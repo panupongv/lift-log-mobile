@@ -22,7 +22,7 @@ class WorkoutListItem extends StatefulWidget {
 class _WorkoutListItemState extends State<WorkoutListItem> {
   String _getExerciseName() {
     String exerciseId = widget._workout.exerciseId;
-    if (exerciseId == Workout.defaultIdReference) {
+    if (exerciseId == Workout.defaultExerciseId) {
       return "";
     }
     Exercise? exercise = widget._exerciseMap[exerciseId];

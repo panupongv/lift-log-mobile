@@ -164,44 +164,51 @@ class _ContentRow extends StatelessWidget {
 
 class WorkoutScreen extends StatefulWidget {
   final Session _session;
-  Workout _workout;
+  final Workout _workout;
   final Map<String, Exercise> _exerciseMap;
-  
+
   WorkoutScreen(this._session, this._workout, this._exerciseMap);
 
   @override
-  State<WorkoutScreen> createState() => _WorkoutScreenState();
+  State<WorkoutScreen> createState() => _WorkoutScreenState(_workout);
 }
 
 class _WorkoutScreenState extends State<WorkoutScreen> {
+  Workout _workout;
+
   bool _saving = false;
-  late List<_ContentRow> _rows;
   List<Exercise> _exercises = [];
   int _selectedIndex = 0;
   int _savedIndex = 0;
-  FixedExtentScrollController _scrollController = FixedExtentScrollController();
+
+  late List<_ContentRow> _rows;
+  late FixedExtentScrollController
+      _scrollController; // = FixedExtentScrollController();
+
+  _WorkoutScreenState(this._workout);
 
   @override
   void initState() {
-    _exercises = [Exercise(Workout.defaultIdReference, "None")] +
+    _exercises = [Exercise(Workout.defaultExerciseId, "None")] +
         widget._exerciseMap.values.toList();
-    print("Exercise List: $_exercises");
-    print(widget._workout.exerciseId);
-    int searchIndex =
-        _exercises.indexWhere((element) => element.id == widget._workout.exerciseId);
-    int _selectedIndex = searchIndex == -1 ? 0 : searchIndex;
-    _savedIndex = _selectedIndex;
+
+    int searchIndex = _exercises
+        .indexWhere((element) => element.id == widget._workout.exerciseId);
+
+    setState(() {
+      _selectedIndex = searchIndex == -1 ? 0 : searchIndex;
+      _savedIndex = _selectedIndex;
+    });
+
     _scrollController =
         FixedExtentScrollController(initialItem: _selectedIndex);
 
-    print("Search: $searchIndex");
-    print("Initial Selected: $_selectedIndex");
-    print("Workout: ${widget._workout}");
+    _buildContentList();
+  }
 
-
-    List<String> _contentList = widget._workout.sets > 0
-        ? widget._workout.content.split(Workout.setSeparator)
-        : [];
+  void _buildContentList() {
+    List<String> _contentList =
+        _workout.sets > 0 ? _workout.content.split(Workout.setSeparator) : [];
     _rows = List<_ContentRow>.generate(
       _contentList.length,
       (index) {
@@ -224,8 +231,6 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
   }
 
   void _removeRow(int index) {
-    print("Before remove: ${widget._workout}");
-    print("Current Index: ${_selectedIndex}");
     setState(() {
       _rows.removeAt(index);
     });
@@ -240,8 +245,6 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
     setState(() {
       _rows = updatedRows;
     });
-    print("After remove: ${widget._workout}");
-    print("Current Index: ${_selectedIndex}");
   }
 
   String? _extractContentFromWidget() {
@@ -266,8 +269,6 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
   Widget _saveButton(context) {
     return navigationBarTextButton(context, "Save", () async {
       final int currentSelectedIndex = _selectedIndex;
-      print("Current Index: $currentSelectedIndex");
-
       setState(() {
         _saving = true;
       });
@@ -290,14 +291,12 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
         return;
       }
 
-      Workout originalWorkout = widget._workout;
+      Workout originalWorkout = _workout;
       Workout updatedWorkout = Workout(
         originalWorkout.id,
         _exercises[currentSelectedIndex].id,
         content,
       );
-
-      print("To Save Workout: $updatedWorkout");
 
       bool updated = await APIService.updateWorkout(
         widget._session,
@@ -305,7 +304,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
       );
       if (updated) {
         setState(() {
-          widget._workout = updatedWorkout;
+          _workout = updatedWorkout;
           _savedIndex = currentSelectedIndex;
         });
       } else {
@@ -346,12 +345,8 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
             setState(() {
               _selectedIndex = selectedIndex;
             });
-
-            print("Selected ${_selectedIndex}");
-            print("Saved ${_savedIndex}");
           },
-          children:
-              _exercises.map((e) => _exercisePickerItem(e)).toList(),
+          children: _exercises.map((e) => _exercisePickerItem(e)).toList(),
         ),
       ),
     );
@@ -363,8 +358,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
       );
 
   Widget _historyButton() {
-    bool available =
-        _savedIndex != 0 && _savedIndex == _selectedIndex;
+    bool available = _savedIndex != 0 && _savedIndex == _selectedIndex;
     return GestureDetector(
       child: Padding(
         padding: const EdgeInsets.only(right: 8),
@@ -382,7 +376,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                   "Unable to see History",
                   _savedIndex == 0
                       ? "Please select a valid exercise and save to see the history."
-                      : "The exercise must be up to date to see the history.",
+                      : "Save the selected exercise first to see the history.",
                   "Dismiss"));
           return;
         }
@@ -392,7 +386,13 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                   widget._session,
                   _exercises[_selectedIndex],
                 ));
-        await Navigator.push(context, historyPageRoute);
+        dynamic copiedContent = await Navigator.push(context, historyPageRoute);
+        if (copiedContent != null && copiedContent is String) {
+          setState(() {
+            _workout.content = copiedContent;
+          });
+          _buildContentList();
+        }
       },
     );
   }
@@ -417,8 +417,6 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
             ),
           ),
           onTap: () {
-            print("Before add: ${widget._workout}");
-            print("Current Index: ${_selectedIndex}");
             if (_rows.isNotEmpty) {
               int previousLastIndex = _rows.length - 1;
               _ContentRow previousLastRow = _rows[previousLastIndex].clone();
@@ -432,8 +430,6 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
             setState(() {
               _rows += [newRow];
             });
-            print("After add: ${widget._workout}");
-            print("Current Index: ${_selectedIndex}");
           },
         ),
       ),
