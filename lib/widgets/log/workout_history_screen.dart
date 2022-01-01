@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:dartz/dartz.dart' as dz;
 import 'package:flutter/cupertino.dart';
 import 'package:liftlogmobile/models/exercise.dart';
@@ -8,12 +10,14 @@ import 'package:liftlogmobile/utils/styles.dart';
 import 'package:liftlogmobile/utils/text_utils.dart';
 import 'package:liftlogmobile/widgets/log/session_info_section.dart';
 import 'package:liftlogmobile/widgets/shared/navigation_bar_text.dart';
+import 'package:sprintf/sprintf.dart';
 
 class WorkoutHistoryScreen extends StatefulWidget {
   final Session _baseSession;
+  final Workout _baseWorkout;
   final Exercise _exercise;
 
-  WorkoutHistoryScreen(this._baseSession, this._exercise);
+  WorkoutHistoryScreen(this._baseSession, this._baseWorkout, this._exercise);
 
   @override
   State<WorkoutHistoryScreen> createState() =>
@@ -22,6 +26,8 @@ class WorkoutHistoryScreen extends StatefulWidget {
 
 class _WorkoutHistoryScreenState extends State<WorkoutHistoryScreen> {
   int _offset = 0;
+  bool _loading = false;
+
   late Session _session;
   Workout _workout = Workout.blankWorkout();
   Session? _nextSession;
@@ -35,6 +41,10 @@ class _WorkoutHistoryScreenState extends State<WorkoutHistoryScreen> {
   }
 
   void _fetchHistory(int offset) async {
+    setState(() {
+      _loading = true;
+    });
+
     dz.Tuple4<Session, Workout, Session?, Session?>? fetchResults =
         await APIService.getHistory(
             widget._baseSession, widget._exercise, offset);
@@ -47,18 +57,132 @@ class _WorkoutHistoryScreenState extends State<WorkoutHistoryScreen> {
         _previousSession = fetchResults.value4;
       });
     }
+    setState(() {
+      _loading = false;
+    });
+  }
+
+  Widget _copyButton() {
+    return navigationBarTextButton(context, "Copy", () {
+      Navigator.pop(context, _workout.content);
+    });
+  }
+
+  Widget _contentRowHalf(String setString) {
+    bool showContent = false;
+    String weightString = "";
+    String repsString = "";
+
+    List<String> weightAndReps = setString.split(Workout.weightRepsSeparator);
+    if (weightAndReps.length == 2) {
+      showContent = true;
+      weightString = weightAndReps[0];
+      repsString = weightAndReps[1];
+    }
+
+    return Expanded(
+      child: Container(
+        decoration: BoxDecoration(
+          color: Styles.listItemBackground(context),
+          borderRadius: const BorderRadius.all(
+            Radius.circular(8.0),
+          ),
+        ),
+        child: Align(
+          alignment: Alignment.bottomRight,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+            child: Text(
+              showContent ? sprintf("%s kg x %2s", [weightString, repsString]) : "",
+              style: Styles.historyContentRow(context),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _contentDisplayRow(String baseSetString, String setString) {
+    //List<String> weightAndReps = setString!.split(Workout.weightRepsSeparator);
+    //String weightString = "";
+    //String repsString = "";
+    //if (weightAndReps.length == 2) {
+    //  weightString = "${weightAndReps[0]} kg";
+    //  repsString = "${weightAndReps[1]} reps";
+    //}
+    //return Container();
+    return Padding(
+      padding: const EdgeInsets.only(top: 12, left: 8, right: 8),
+      child: Row(
+        children: [
+          _contentRowHalf(baseSetString),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 4),
+            child: Icon(CupertinoIcons.arrow_left),
+          ),
+          _contentRowHalf(setString)
+        ],
+      ),
+    );
+  }
+
+  Widget _contentDisplay() {
+    List<String> baseContent =
+        widget._baseWorkout.content.split(Workout.setSeparator);
+    List<String> currentContent = _workout.content.split(Workout.setSeparator);
+    int numberOfRows = max(baseContent.length, currentContent.length);
+
+    return ListView(
+        children: List<int>.generate(numberOfRows, (i) => i)
+            .map((index) => _contentDisplayRow(
+                index >= baseContent.length ? "" : baseContent[index],
+                index >= currentContent.length ? "" : currentContent[index]))
+            .toList());
+
+    //int sets = _workout.sets;
+    //String setHeaderString = "$sets set${sets == 1 ? '' : 's'}";
+
+    //return Padding(
+    //    padding: const EdgeInsets.only(
+    //      top: 8,
+    //      left: 8,
+    //      right: 8,
+    //      bottom: 4,
+    //    ),
+    //    child: Container(
+    //      decoration: BoxDecoration(
+    //        color: Styles.listItemBackground(context),
+    //        borderRadius: const BorderRadius.all(Radius.circular(8)),
+    //      ),
+    //      child: ListView(
+    //        children: <Widget>[
+    //              Padding(
+    //                padding:
+    //                    const EdgeInsets.only(top: 8, left: 12, bottom: 12),
+    //                child: Text(
+    //                  setHeaderString,
+    //                  style: Styles.historySetHeader(context),
+    //                ),
+    //              ),
+    //            ] +
+    //            _workout.content
+    //                .split(Workout.setSeparator)
+    //                .map((setString) => _contentDisplayRow(setString))
+    //                .toList(),
+    //      ),
+    //    ));
   }
 
   Widget _sessionShiftButton(bool next) {
     bool available =
         (next && _nextSession != null) || (!next && _previousSession != null);
 
-    if (!available) return Container();
-
-    Session targetSession = next ? _nextSession! : _previousSession!;
+    Session targetSession = available
+        ? (next ? _nextSession! : _previousSession!)
+        : Session("", "", DateTime.now(), "");
     EdgeInsets boxInsets = next
-        ? const EdgeInsets.only(top: 8, left: 8, right: 4)
-        : const EdgeInsets.only(top: 8, left: 4, right: 8);
+        ? const EdgeInsets.only(top: 8, left: 8, right: 4, bottom: 8)
+        : const EdgeInsets.only(top: 8, left: 4, right: 8, bottom: 8);
     EdgeInsets infoInsets = const EdgeInsets.only(left: 4);
 
     return GestureDetector(
@@ -83,14 +207,16 @@ class _WorkoutHistoryScreenState extends State<WorkoutHistoryScreen> {
                                 : Styles.inactiveColor(context),
                           ),
                           Text("Next Session",
-                              style: Styles.historyShiftButton(context)),
+                              style: Styles.historyShiftButton(
+                                  context, available)),
                         ],
                       )
                     : Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           Text("Previous Session",
-                              style: Styles.historyShiftButton(context)),
+                              style: Styles.historyShiftButton(
+                                  context, available)),
                           Icon(
                             CupertinoIcons.right_chevron,
                             color: available
@@ -106,7 +232,8 @@ class _WorkoutHistoryScreenState extends State<WorkoutHistoryScreen> {
                 ),
                 Padding(
                   padding: infoInsets,
-                  child: Text(targetSession.getDateInDisplayFormat(),
+                  child: Text(
+                      available ? targetSession.getDateInDisplayFormat() : "",
                       style: Styles.historyShiftInfo(context)),
                 ),
                 Container(
@@ -117,7 +244,7 @@ class _WorkoutHistoryScreenState extends State<WorkoutHistoryScreen> {
           ),
         ),
         onTap: () {
-          if (!available) return;
+          if (!available || _loading) return;
           if (next) {
             _offset -= 1;
           } else {
@@ -125,54 +252,6 @@ class _WorkoutHistoryScreenState extends State<WorkoutHistoryScreen> {
           }
           _fetchHistory(_offset);
         });
-  }
-
-  Widget _previousButton() {
-    bool available = _previousSession != null;
-
-    if (!available) return Container();
-    return Padding(
-      padding: const EdgeInsets.only(top: 8, left: 4, right: 8),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Styles.listItemBackground(context),
-          borderRadius: const BorderRadius.all(Radius.circular(8)),
-        ),
-        child: GestureDetector(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Text("Previous Session",
-                      style: Styles.historyShiftButton(context)),
-                  Icon(
-                    CupertinoIcons.right_chevron,
-                    color: available
-                        ? Styles.activeColor(context)
-                        : Styles.inactiveColor(context),
-                  ),
-                ],
-              ),
-              Text(_previousSession!.name,
-                  style: Styles.historyShiftButton(context)),
-            ],
-          ),
-          onTap: () {
-            if (!available) return;
-            _offset += 1;
-            _fetchHistory(_offset);
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget _copyButton() {
-    return navigationBarTextButton(context, "Copy", () {
-      Navigator.pop(context, _workout.content);
-    });
   }
 
   @override
@@ -185,30 +264,39 @@ class _WorkoutHistoryScreenState extends State<WorkoutHistoryScreen> {
       ),
       child: SafeArea(
         top: true,
-        child: ListView(
+        child: Column(
           children: [
-            sessionInfoSection(
-              context,
-              _session,
-              showSessionName: true,
-            ),
-            Text(_offset.toString()),
-            Text(_session.getDateInDisplayFormat()),
-            Text(_workout.content),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Flexible(
-                  child: _sessionShiftButton(true),
-                  flex: 1,
-                ),
-                Flexible(
-                  child: _sessionShiftButton(false),
-                  flex: 1,
+                sessionInfoSection(
+                  context,
+                  _session,
+                  showSessionName: true,
+                )
+              ] +
+              [
+                Expanded(
+                  child: _loading
+                      ? const Center(child: CupertinoActivityIndicator())
+                      : _contentDisplay(),
+                )
+              ] +
+              [
+                Container(
+                  color: Styles.defaultBackground(context),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Flexible(
+                        child: _sessionShiftButton(true),
+                        flex: 1,
+                      ),
+                      Flexible(
+                        child: _sessionShiftButton(false),
+                        flex: 1,
+                      ),
+                    ],
+                  ),
                 ),
               ],
-            ),
-          ],
         ),
       ),
     );

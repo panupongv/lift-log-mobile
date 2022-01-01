@@ -174,10 +174,21 @@ abstract class Styles {
       fontSize: 17,
       color: _defaultText(context));
 
-  static TextStyle historyShiftButton(context) => TextStyle(
+  static TextStyle historySetHeader(context) => TextStyle(
+      fontWeight: FontWeight.bold,
+      fontFamily: _defaultFontFamily,
+      fontSize: 21,
+      color: _defaultText(context));
+
+  static TextStyle historyContentRow(context) => TextStyle(
+      fontFamily: _defaultFontFamily,
+      fontSize: 19,
+      color: _defaultText(context));
+
+  static TextStyle historyShiftButton(context, isActive) => TextStyle(
       fontFamily: _defaultFontFamily,
       fontSize: 15,
-      color: activeColor(context));
+      color: isActive ? activeColor(context) : inactiveColor(context));
 
   static TextStyle historyShiftInfo(context) => TextStyle(
       fontFamily: _defaultFontFamily,

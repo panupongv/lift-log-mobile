@@ -384,6 +384,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
         CupertinoPageRoute historyPageRoute = CupertinoPageRoute(
             builder: (BuildContext context) => WorkoutHistoryScreen(
                   widget._session,
+                  widget._workout,
                   _exercises[_selectedIndex],
                 ));
         dynamic copiedContent = await Navigator.push(context, historyPageRoute);

@@ -67,30 +67,34 @@ class _SessionScreenState extends State<SessionScreen> {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
+      backgroundColor: Styles.defaultBackground(context),
       navigationBar: CupertinoNavigationBar(
         middle: navigationBarTitle(context, widget._session.name),
         trailing: _newWorkoutButton(),
       ),
       child: SafeArea(
         top: true,
-        child: Container(
-          color: Styles.defaultBackground(context),
-          child: ListView(
-            children: [
-                  sessionInfoSection(context, widget._session),
-                ] +
-                (_loadingInitialList
-                    ? [
-                        Container(
-                          height: 15,
-                        ),
-                        const CupertinoActivityIndicator()
-                      ]
-                    : _workouts.map((Workout wo) {
-                        return WorkoutListItem(widget._session, wo,
-                            widget._exerciseMap, _loadWorkouts);
-                      }).toList()),
-          ),
+        child: Column(
+          children: [
+                sessionInfoSection(context, widget._session),
+              ] +
+              [
+                Expanded(
+                  child: ListView(
+                    children: _loadingInitialList
+                        ? [
+                            Container(
+                              height: 15,
+                            ),
+                            const CupertinoActivityIndicator()
+                          ]
+                        : _workouts.map((Workout wo) {
+                            return WorkoutListItem(widget._session, wo,
+                                widget._exerciseMap, _loadWorkouts);
+                          }).toList(),
+                  ),
+                )
+              ],
         ),
       ),
     );
