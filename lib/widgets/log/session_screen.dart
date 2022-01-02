@@ -31,10 +31,12 @@ class _SessionScreenState extends State<SessionScreen> {
   void _loadWorkouts() async {
     List<Workout> loadedWorkouts =
         await APIService.getWorkouts(widget._session);
-    setState(() {
-      _workouts = loadedWorkouts;
-      _loadingInitialList = false;
-    });
+    if (mounted) {
+      setState(() {
+        _workouts = loadedWorkouts;
+        _loadingInitialList = false;
+      });
+    }
   }
 
   Widget _newWorkoutButton() {

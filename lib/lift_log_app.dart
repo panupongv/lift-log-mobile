@@ -30,8 +30,7 @@ class _LiftLogAppState extends State<LiftLogApp> {
   void _reloadExerciseList() async {
     List<Exercise> updatedExercises = await APIService.getExercises();
     setState(() {
-      _exerciseMap =
-          { for (Exercise e in updatedExercises) e.id : e };
+      _exerciseMap = {for (Exercise e in updatedExercises) e.id: e};
     });
   }
 
@@ -54,18 +53,8 @@ class _LiftLogAppState extends State<LiftLogApp> {
           ),
         ],
         onTap: (int index) {
-          if (_currentIndex == index) {
-            switch (index) {
-              case 0:
-                navigatorKey0.currentState!.popUntil((Route r) => r.isFirst);
-                break;
-              case 1:
-                navigatorKey1.currentState!.popUntil((Route r) => r.isFirst);
-                break;
-              case 2:
-                navigatorKey2.currentState!.popUntil((Route r) => r.isFirst);
-                break;
-            }
+          if (_currentIndex == index && index == 1) {
+            navigatorKey1.currentState!.popUntil((Route r) => r.isFirst);
           }
           _currentIndex = index;
         },
@@ -89,8 +78,7 @@ class _LiftLogAppState extends State<LiftLogApp> {
               case 1:
                 return LogTab(_exerciseMap);
               case 2:
-                return ExerciseLibraryTab(
-                    _reloadExerciseList, _exerciseMap);
+                return ExerciseLibraryTab(_reloadExerciseList, _exerciseMap);
               default:
                 return const Text("Tab Unavailable");
             }
