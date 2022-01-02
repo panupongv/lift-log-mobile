@@ -244,4 +244,34 @@ class APIService {
 
     return response.statusCode == HttpStatus.ok;
   }
+
+  static Future<Tuple4<Session, Workout, Session?, Session?>?> getHistory(
+      Session session, Exercise exercise, int offset) async {
+    User user = GlobalUser.user!;
+    Map<String, String> queryParams = {
+      'date': session.getDateInDatabaseFormat(),
+      'offset': offset.toString(),
+    };
+    final Uri url = Uri.parse(
+        "$_host/${user.username}/sessions/history/${exercise.id}" +
+            parameteriseQuery(queryParams));
+
+    Response response = await get(url, headers: jsonHeaderWithAuthToken(user));
+
+    if (response.statusCode == HttpStatus.ok) {
+      dynamic json = jsonDecode(response.body);
+
+      Session mainSession = Session.fromJson(json['session']);
+      Workout mainWorkout = Workout.fromJson(json['session']['workouts']);
+      Session? nextSession = json['newerSession'] != null
+          ? Session.fromJson(json['newerSession'])
+          : null;
+      Session? previousSession = json['olderSession'] != null
+          ? Session.fromJson(json['olderSession'])
+          : null;
+
+      return Tuple4(mainSession, mainWorkout, nextSession, previousSession);
+    }
+    return null;
+  }
 }

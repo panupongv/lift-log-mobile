@@ -5,8 +5,7 @@ class Workout {
 
   static const String setSeparator = ";";
   static const String weightRepsSeparator = "x";
-
-  static const String defaultIdReference = "000000000000000000000000";
+  static const String defaultExerciseId = "000000000000000000000000";
 
   Workout(this._id, this._exerciseId, this._content);
 
@@ -29,7 +28,7 @@ class Workout {
   }
 
   factory Workout.blankWorkout() {
-    return Workout("", defaultIdReference, "");
+    return Workout("", defaultExerciseId, "");
   }
 
   factory Workout.fromJson(json) {
@@ -43,11 +42,18 @@ class Workout {
   }
 
   set exerciseId(String newExerciseId) {
+    if (newExerciseId.isNotEmpty) {
     _exerciseId = newExerciseId;
+    }
   }
 
   set content(String content) {
     if (validateContent(content)) _content = content;
+  }
+
+  @override
+  String toString() {
+    return "ID: $_id, Exercise ID: $_exerciseId, Content: $_content";
   }
 
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:liftlogmobile/models/exercise.dart';
@@ -39,6 +40,7 @@ class _ContentRow extends StatelessWidget {
   }
 
   String deb() => "$_index $_isMoveUpAvailable $_isMoveDownAvailable";
+
   String _rawWeightAndReps() =>
       "${_weightTextController.text}${Workout.weightRepsSeparator}${_repsTextController.text}";
 
@@ -164,34 +166,49 @@ class WorkoutScreen extends StatefulWidget {
   final Session _session;
   final Workout _workout;
   final Map<String, Exercise> _exerciseMap;
-  List<Exercise> _exercises = [];
-  int _selectedIndex = 0;
-  FixedExtentScrollController _scrollController = FixedExtentScrollController();
 
-  WorkoutScreen(this._session, this._workout, this._exerciseMap) {
-    _exercises = [Exercise(Workout.defaultIdReference, "None")] +
-        _exerciseMap.values.toList();
-    int index =
-        _exercises.indexWhere((element) => element.id == _workout.exerciseId);
-    _selectedIndex = index == -1 ? 0 : index;
-    _scrollController =
-        FixedExtentScrollController(initialItem: _selectedIndex);
-  }
+  WorkoutScreen(this._session, this._workout, this._exerciseMap);
 
   @override
-  State<WorkoutScreen> createState() => _WorkoutScreenState();
+  State<WorkoutScreen> createState() => _WorkoutScreenState(_workout);
 }
 
 class _WorkoutScreenState extends State<WorkoutScreen> {
+  Workout _workout;
+
   bool _saving = false;
-  bool _savedAtLeastOnce = false;
+  List<Exercise> _exercises = [];
+  int _selectedIndex = 0;
+  int _savedIndex = 0;
+
   late List<_ContentRow> _rows;
+  late FixedExtentScrollController
+      _scrollController; // = FixedExtentScrollController();
+
+  _WorkoutScreenState(this._workout);
 
   @override
   void initState() {
-    List<String> _contentList = widget._workout.sets > 0
-        ? widget._workout.content.split(Workout.setSeparator)
-        : [];
+    _exercises = [Exercise(Workout.defaultExerciseId, "None")] +
+        widget._exerciseMap.values.toList();
+
+    int searchIndex = _exercises
+        .indexWhere((element) => element.id == widget._workout.exerciseId);
+
+    setState(() {
+      _selectedIndex = searchIndex == -1 ? 0 : searchIndex;
+      _savedIndex = _selectedIndex;
+    });
+
+    _scrollController =
+        FixedExtentScrollController(initialItem: _selectedIndex);
+
+    _buildContentList();
+  }
+
+  void _buildContentList() {
+    List<String> _contentList =
+        _workout.sets > 0 ? _workout.content.split(Workout.setSeparator) : [];
     _rows = List<_ContentRow>.generate(
       _contentList.length,
       (index) {
@@ -251,6 +268,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
 
   Widget _saveButton(context) {
     return navigationBarTextButton(context, "Save", () async {
+      final int currentSelectedIndex = _selectedIndex;
       setState(() {
         _saving = true;
       });
@@ -273,17 +291,22 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
         return;
       }
 
-      Workout originalWorkout = widget._workout;
+      Workout originalWorkout = _workout;
       Workout updatedWorkout = Workout(
         originalWorkout.id,
-        widget._exercises[widget._selectedIndex].id,
+        _exercises[currentSelectedIndex].id,
         content,
       );
 
-      bool updated =
-          await APIService.updateWorkout(widget._session, updatedWorkout);
+      bool updated = await APIService.updateWorkout(
+        widget._session,
+        updatedWorkout,
+      );
       if (updated) {
-        _savedAtLeastOnce = true;
+        setState(() {
+          _workout = updatedWorkout;
+          _savedIndex = currentSelectedIndex;
+        });
       } else {
         showCupertinoDialog(
           context: context,
@@ -316,16 +339,14 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
         ),
         height: 120,
         child: CupertinoPicker(
-          scrollController: widget._scrollController,
+          scrollController: _scrollController,
           itemExtent: 28,
           onSelectedItemChanged: (int selectedIndex) {
             setState(() {
-              widget._selectedIndex = selectedIndex;
+              _selectedIndex = selectedIndex;
             });
-            print(widget._selectedIndex);
           },
-          children:
-              widget._exercises.map((e) => _exercisePickerItem(e)).toList(),
+          children: _exercises.map((e) => _exercisePickerItem(e)).toList(),
         ),
       ),
     );
@@ -337,23 +358,42 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
       );
 
   Widget _historyButton() {
-    bool available = widget._selectedIndex != 0;
+    bool available = _savedIndex != 0 && _savedIndex == _selectedIndex;
     return GestureDetector(
       child: Padding(
         padding: const EdgeInsets.only(right: 8),
-        child: Text("See History",
-            style: Styles.historyButton(context, available)),
+        child: Text(
+          "See History",
+          style: Styles.historyButton(context, available),
+        ),
       ),
       onTap: () async {
-        if (!available) return;
-        
-        print(widget._session.getDateInDatabaseFormat());
-        print(widget._exercises[widget._selectedIndex].id);
-        print(widget._exercises[widget._selectedIndex].name);
+        if (!available) {
+          showCupertinoDialog(
+              context: context,
+              builder: (context) => quickAlertDialog(
+                  context,
+                  "Unable to see History",
+                  _savedIndex == 0
+                      ? "Please select a valid exercise and save to see the history."
+                      : "Save the selected exercise first to see the history.",
+                  "Dismiss"));
+          return;
+        }
 
         CupertinoPageRoute historyPageRoute = CupertinoPageRoute(
-            builder: (BuildContext context) => WorkoutHistoryScreen());
-        await Navigator.push(context, historyPageRoute);
+            builder: (BuildContext context) => WorkoutHistoryScreen(
+                  widget._session,
+                  widget._workout,
+                  _exercises[_selectedIndex],
+                ));
+        dynamic copiedContent = await Navigator.push(context, historyPageRoute);
+        if (copiedContent != null && copiedContent is String) {
+          setState(() {
+            _workout.content = copiedContent;
+          });
+          _buildContentList();
+        }
       },
     );
   }

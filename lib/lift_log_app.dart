@@ -29,8 +29,6 @@ class _LiftLogAppState extends State<LiftLogApp> {
 
   void _reloadExerciseList() async {
     List<Exercise> updatedExercises = await APIService.getExercises();
-    updatedExercises
-        .sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
     setState(() {
       _exerciseMap =
           { for (Exercise e in updatedExercises) e.id : e };
