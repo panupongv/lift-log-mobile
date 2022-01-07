@@ -43,19 +43,23 @@ class Session {
     return Session(json['_id'], json['name'], date, json['location']);
   }
 
-  DateTime fromDisplayFormatDate(String dateString) {
-    return DateTime.parse(dateString);
+  static String convertDateToDisplayFormat(DateTime date) {
+    return _displayDateFormat.format(date);
   }
 
-  String getDateInDisplayFormat() {
-    return _displayDateFormat.format(_date);
+  static String convertDateToDatabaseFormat(DateTime date) {
+    return "${_databaseDateFormat.format(date.toUtc())}Z";
+  }
+
+  DateTime fromDisplayFormatDate(String dateString) {
+    return DateTime.parse(dateString);
   }
 
   String getDayOfWeek() {
     return DateFormat("EEEE").format(_date);
   }
 
-  String getDateInDatabaseFormat() {
-    return "${_databaseDateFormat.format(_date.toUtc())}Z";
-  }
+  String getDateInDisplayFormat() => convertDateToDisplayFormat(_date);
+
+  String getDateInDatabaseFormat() => convertDateToDatabaseFormat(_date);
 }

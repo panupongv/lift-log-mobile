@@ -143,6 +143,26 @@ class APIService {
     return [];
   }
 
+  static Future<List<Session>> getSessionsByDate(DateTime startDate, DateTime endDate) async {
+    User user = GlobalUser.user!;
+    Map<String, String> query = {
+      'startDate': Session.convertDateToDatabaseFormat(startDate),
+      'endDate': Session.convertDateToDatabaseFormat(endDate),
+    };
+
+    final Uri url = Uri.parse(
+        "$_host/${user.username}/sessions/dates" + parameteriseQuery(query));
+
+    Response response = await get(url, headers: jsonHeaderWithAuthToken(user));
+
+    if (response.statusCode == HttpStatus.ok) {
+      dynamic json = jsonDecode(response.body);
+      List<dynamic> rawSessions = json['sessions'];
+      return rawSessions.map((s) => Session.fromJson(s)).toList();
+    }
+    return [];
+  } 
+
   static Future<Session?> createSession(Session session) async {
     User user = GlobalUser.user!;
     final Uri url = Uri.parse("$_host/${user.username}/sessions");
