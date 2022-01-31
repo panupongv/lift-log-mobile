@@ -4,8 +4,10 @@ import 'package:flutter/widgets.dart';
 import 'package:liftlogmobile/models/session.dart';
 import 'package:liftlogmobile/models/calendar_session_source.dart';
 import 'package:liftlogmobile/services/api_service.dart';
+import 'package:liftlogmobile/utils/date_util.dart';
 import 'package:liftlogmobile/utils/styles.dart';
 import 'package:liftlogmobile/widgets/shared/navigation_bar_text.dart';
+import 'package:liftlogmobile/widgets/log/session_list_item.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 
 class OverviewTab extends StatefulWidget {
@@ -14,22 +16,27 @@ class OverviewTab extends StatefulWidget {
 }
 
 class _OverviewTabState extends State<OverviewTab> {
+  List<Session> _sessions = [];
+  List<Session> _sessionsToDisplay = [];
   late DateTime _startDate = _firstDayOfMonth(DateTime.now());
   late DateTime _endDate = _lastDayOfMonth(_startDate);
+
+  CalendarController _calendarController = CalendarController();
   late CalendarSessionSource _calendarDataSource = CalendarSessionSource([]);
 
   @override
   void initState() {
+    _calendarController.selectedDate = today();
     _loadCalendarSessions();
   }
 
   void _loadCalendarSessions() async {
-    List<Session> sessions =
-        await APIService.getSessionsByDate(_startDate, _endDate);
+    _sessions = await APIService.getSessionsByDate(_startDate, _endDate);
     setState(() {
       _calendarDataSource =
-          CalendarSessionSource.wrapInSource(context, sessions);
+          CalendarSessionSource.wrapInSource(context, _sessions);
     });
+    _filterSessionsToDisplay(_sessions);
   }
 
   DateTime _firstDayOfMonth(DateTime startDate) =>
@@ -38,6 +45,19 @@ class _OverviewTabState extends State<OverviewTab> {
   DateTime _lastDayOfMonth(DateTime startDate) =>
       DateUtils.addMonthsToMonthDate(startDate, 1)
           .subtract(const Duration(days: 1));
+
+  void _filterSessionsToDisplay(List<Session> sessions) {
+    print(_sessions);
+    print(_calendarController.selectedDate!);
+
+    setState(() {
+      _sessionsToDisplay = sessions
+          .where((session) =>
+              session.date.isAtSameMomentAs(_calendarController.selectedDate!))
+          .toList();
+    });
+    print(_sessionsToDisplay);
+  }
 
   Widget _calendarSection() {
     return Padding(
@@ -49,6 +69,7 @@ class _OverviewTabState extends State<OverviewTab> {
         ),
         height: 300,
         child: SfCalendar(
+          controller: _calendarController,
           headerStyle:
               CalendarHeaderStyle(textStyle: Styles.calendarHeader(context)),
           viewHeaderStyle: ViewHeaderStyle(
@@ -63,7 +84,9 @@ class _OverviewTabState extends State<OverviewTab> {
           view: CalendarView.month,
           dataSource: _calendarDataSource,
           onSelectionChanged: (CalendarSelectionDetails details) {
-            print(details.date);
+            Future.delayed(Duration.zero, () async {
+              _filterSessionsToDisplay(_sessions);
+            });
           },
         ),
       ),
@@ -75,7 +98,9 @@ class _OverviewTabState extends State<OverviewTab> {
       child: Text("Today", style: Styles.monthShiftButton(context)),
       onTap: () {
         setState(() {
-          _startDate = _firstDayOfMonth(DateTime.now());
+          DateTime todaysDate = today();
+          _calendarController.selectedDate = todaysDate;
+          _startDate = _firstDayOfMonth(todaysDate);
           _endDate = _lastDayOfMonth(_startDate);
         });
       },
@@ -117,7 +142,7 @@ class _OverviewTabState extends State<OverviewTab> {
       navigationBar: CupertinoNavigationBar(
         middle: navigationBarTitle(context, "Overview"),
         trailing: navigationBarTextButton(context, "Refresh", () {
-           _loadCalendarSessions();
+          _loadCalendarSessions();
         }),
       ),
       backgroundColor: Styles.defaultBackground(context),
@@ -125,25 +150,32 @@ class _OverviewTabState extends State<OverviewTab> {
         top: true,
         child: ListView(
           children: [
-            _calendarSection(),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                SizedBox(
-                  child: _monthShiftButton(false),
-                  width: 120,
+                _calendarSection(),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    SizedBox(
+                      child: _monthShiftButton(false),
+                      width: 120,
+                    ),
+                    Align(
+                      child: _todayButton(),
+                      alignment: Alignment.center,
+                    ),
+                    SizedBox(
+                      child: _monthShiftButton(true),
+                      width: 120,
+                    )
+                  ],
                 ),
-                Align(
-                  child: _todayButton(),
-                  alignment: Alignment.center,
-                ),
-                SizedBox(
-                  child: _monthShiftButton(true),
-                  width: 120,
-                )
-              ],
-            ),
-          ],
+
+                //SessionListItem(_session, _reloadSessions, _navigateToSession)
+              ] +
+              _sessionsToDisplay
+                  //.where((element) => element.date
+                  //    .isAtSameMomentAs(_calendarController.selectedDate!))
+                  .map((e) => SessionListItem(e, (){}, (){}))
+                  .toList(),
         ),
       ),
     );
