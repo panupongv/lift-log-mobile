@@ -47,16 +47,12 @@ class _OverviewTabState extends State<OverviewTab> {
           .subtract(const Duration(days: 1));
 
   void _filterSessionsToDisplay() {
-    print(_sessions);
-    print(_calendarController.selectedDate!);
-
     setState(() {
       _sessionsToDisplay = _sessions
           .where((session) =>
               session.date.isAtSameMomentAs(_calendarController.selectedDate!))
           .toList();
     });
-    print(_sessionsToDisplay);
   }
 
   Widget _calendarSection() {
@@ -133,13 +129,12 @@ class _OverviewTabState extends State<OverviewTab> {
                 Text("Previous", style: Styles.monthShiftButton(context)),
               ],
             )),
-      onTap: () async {
+      onTap: () {
         setState(() {
           _startDate =
               DateUtils.addMonthsToMonthDate(_startDate, next ? 1 : -1);
           _endDate = _lastDayOfMonth(_startDate);
         });
-        _sessions = await APIService.getSessionsByDate(_startDate, _endDate);
         _loadCalendarSessions();
       },
     );
