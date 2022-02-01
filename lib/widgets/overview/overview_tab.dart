@@ -36,7 +36,7 @@ class _OverviewTabState extends State<OverviewTab> {
       _calendarDataSource =
           CalendarSessionSource.wrapInSource(context, _sessions);
     });
-    _filterSessionsToDisplay(_sessions);
+    _filterSessionsToDisplay();
   }
 
   DateTime _firstDayOfMonth(DateTime startDate) =>
@@ -46,12 +46,12 @@ class _OverviewTabState extends State<OverviewTab> {
       DateUtils.addMonthsToMonthDate(startDate, 1)
           .subtract(const Duration(days: 1));
 
-  void _filterSessionsToDisplay(List<Session> sessions) {
+  void _filterSessionsToDisplay() {
     print(_sessions);
     print(_calendarController.selectedDate!);
 
     setState(() {
-      _sessionsToDisplay = sessions
+      _sessionsToDisplay = _sessions
           .where((session) =>
               session.date.isAtSameMomentAs(_calendarController.selectedDate!))
           .toList();
@@ -85,7 +85,7 @@ class _OverviewTabState extends State<OverviewTab> {
           dataSource: _calendarDataSource,
           onSelectionChanged: (CalendarSelectionDetails details) {
             Future.delayed(Duration.zero, () async {
-              _filterSessionsToDisplay(_sessions);
+              _filterSessionsToDisplay();
             });
           },
         ),
@@ -103,6 +103,7 @@ class _OverviewTabState extends State<OverviewTab> {
           _startDate = _firstDayOfMonth(todaysDate);
           _endDate = _lastDayOfMonth(_startDate);
         });
+        _loadCalendarSessions();
       },
     );
   }
@@ -116,22 +117,30 @@ class _OverviewTabState extends State<OverviewTab> {
                 Text("Next", style: Styles.monthShiftButton(context)),
                 Icon(CupertinoIcons.right_chevron,
                     color: Styles.activeColor(context)),
+                Container(
+                  width: 10,
+                )
               ],
             )
           : Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
+                Container(
+                  width: 10,
+                ),
                 Icon(CupertinoIcons.left_chevron,
                     color: Styles.activeColor(context)),
                 Text("Previous", style: Styles.monthShiftButton(context)),
               ],
             )),
-      onTap: () {
+      onTap: () async {
         setState(() {
           _startDate =
               DateUtils.addMonthsToMonthDate(_startDate, next ? 1 : -1);
           _endDate = _lastDayOfMonth(_startDate);
         });
+        _sessions = await APIService.getSessionsByDate(_startDate, _endDate);
+        _loadCalendarSessions();
       },
     );
   }
@@ -168,13 +177,9 @@ class _OverviewTabState extends State<OverviewTab> {
                     )
                   ],
                 ),
-
-                //SessionListItem(_session, _reloadSessions, _navigateToSession)
               ] +
               _sessionsToDisplay
-                  //.where((element) => element.date
-                  //    .isAtSameMomentAs(_calendarController.selectedDate!))
-                  .map((e) => SessionListItem(e, (){}, (){}))
+                  .map((e) => SessionListItem(e, () {}, () {}))
                   .toList(),
         ),
       ),
