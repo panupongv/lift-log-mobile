@@ -12,7 +12,7 @@ class LiftLogApp extends StatefulWidget {
 }
 
 class _LiftLogAppState extends State<LiftLogApp> {
-  int _currentIndex = 0;
+  int _currentTabIndex = 0;
   Map<String, Exercise> _exerciseMap = Map<String, Exercise>();
 
   _LiftLogAppState();
@@ -53,10 +53,13 @@ class _LiftLogAppState extends State<LiftLogApp> {
           ),
         ],
         onTap: (int index) {
-          if (_currentIndex == index && index == 1) {
-            navigatorKey1.currentState!.popUntil((Route r) => r.isFirst);
+          if (_currentTabIndex == index) {
+            switch (index) {
+              case 0: navigatorKey0.currentState!.popUntil((Route r) => r.isFirst); break;
+              case 1: navigatorKey1.currentState!.popUntil((Route r) => r.isFirst); break;
+            }
           }
-          _currentIndex = index;
+          _currentTabIndex = index;
         },
       ),
       tabBuilder: (BuildContext context, int index) {
@@ -74,7 +77,7 @@ class _LiftLogAppState extends State<LiftLogApp> {
           builder: (BuildContext context) {
             switch (index) {
               case 0:
-                return OverviewTab();
+                return OverviewTab(_exerciseMap);
               case 1:
                 return LogTab(_exerciseMap);
               case 2:

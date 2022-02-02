@@ -120,7 +120,7 @@ class ExerciseListItem extends StatelessWidget {
 
   Widget _ellipsisOptions(context) {
     return Padding(
-      padding: const EdgeInsets.only(right: 10, top: 10, bottom: 10),
+      padding: const EdgeInsets.only(right: 8, top: 8, bottom: 8),
       child: GestureDetector(
         child: Icon(
           CupertinoIcons.ellipsis,

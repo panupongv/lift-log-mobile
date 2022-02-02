@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:liftlogmobile/models/exercise.dart';
 import 'package:liftlogmobile/models/session.dart';
 import 'package:liftlogmobile/models/calendar_session_source.dart';
 import 'package:liftlogmobile/services/api_service.dart';
@@ -10,7 +11,13 @@ import 'package:liftlogmobile/widgets/shared/navigation_bar_text.dart';
 import 'package:liftlogmobile/widgets/log/session_list_item.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 
+import 'overview_session_screen.dart';
+
 class OverviewTab extends StatefulWidget {
+  Map<String, Exercise> _exerciseMap;
+
+  OverviewTab(this._exerciseMap);
+
   @override
   State<OverviewTab> createState() => _OverviewTabState();
 }
@@ -140,6 +147,24 @@ class _OverviewTabState extends State<OverviewTab> {
     );
   }
 
+  List<Widget> _listItems(BuildContext context) {
+    return _sessionsToDisplay
+        .map(
+          (session) => SessionListItem(
+            session,
+            () {},
+            (_) {
+              CupertinoPageRoute sessionPageRoute = CupertinoPageRoute(
+                  builder: (context) =>
+                      OverviewSessionScreen(widget._exerciseMap, session));
+              Navigator.push(context, sessionPageRoute);
+            },
+            showEllipses: false,
+          ),
+        )
+        .toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
@@ -172,10 +197,11 @@ class _OverviewTabState extends State<OverviewTab> {
                     )
                   ],
                 ),
+                Container(
+                  height: 10,
+                )
               ] +
-              _sessionsToDisplay
-                  .map((e) => SessionListItem(e, () {}, () {}))
-                  .toList(),
+              _listItems(context),
         ),
       ),
     );
