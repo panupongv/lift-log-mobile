@@ -1,57 +1,35 @@
 import 'dart:io';
 
-import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:flutter/cupertino.dart';
+import 'package:liftlogmobile/lift_log_app.dart';
+import 'package:liftlogmobile/widgets/auth/login_screen.dart';
+import 'package:liftlogmobile/services/local_storage_service.dart';
 
-String baseUrl = "https://lift-log-prod.herokuapp.com/api";
+import 'models/user.dart';
 
 void main() {
-  runApp(const LiftLogApp());
+  runApp(const EntryPoint());
 }
 
-class LiftLogApp extends StatelessWidget {
-  const LiftLogApp({Key? key}) : super(key: key);
+class EntryPoint extends StatelessWidget {
+  const EntryPoint({Key? key}) : super(key: key);
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.blue,
+    return CupertinoApp(
+      debugShowCheckedModeBanner: false,
+      home: FutureBuilder(
+        future: LocalStorageService.loadSavedUser(),
+        builder: (BuildContext context, AsyncSnapshot<User?> currentUser) {
+          if (currentUser.data != null) {
+            GlobalUser.user = currentUser.data!;
+            print("Logging in as ${GlobalUser.user!.username}");
+            return LiftLogApp();
+          } else {
+            return LoginScreen();
+          }
+        },
       ),
-      home: TempPage(),
     );
   }
-}
-
-class TempPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      child: TextButton(onPressed: () async {
-
-
-        final xxx = await http.get(
-          Uri.parse("$baseUrl/produser/exercises"),
-          headers: {
-            HttpHeaders.authorizationHeader: 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InByb2R1c2VyIiwiaWF0IjoxNjI5NjYzNjk2fQ._8Uj9JXE-JUugIbBXgCf-IOsWhBiEsQuREUKjCwmYjA'
-          },
-        );
-        print("MOFO "  + xxx.body.toString());
-      }, 
-      child: const Text("Hello")),
-    );
-  }
-
-
 }
