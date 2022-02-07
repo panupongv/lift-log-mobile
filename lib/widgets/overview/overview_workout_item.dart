@@ -14,6 +14,7 @@ class ExpandedSection extends StatelessWidget {
 
   ExpandedSection(this._workout, this._expanded) {
     items = _workout.content.split(Workout.setSeparator);
+    if (items.length == 1 && items[0].length == 0) items = [];
   }
 
   double totalHeight() => heightPerItem * items.length + 10;
