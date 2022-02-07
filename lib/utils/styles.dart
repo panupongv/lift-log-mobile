@@ -132,6 +132,12 @@ abstract class Styles {
       fontSize: 17,
       color: activeColor(context));
 
+  static TextStyle overviewWorkoutContent(context) => TextStyle(
+      fontFamily: _defaultFontFamily,
+      fontSize: 17,
+      fontWeight: FontWeight.bold,
+      color: _defaultText(context));
+
   // Log Tab TextStyles
 
   static TextStyle sessionListItemHeader(context) => TextStyle(

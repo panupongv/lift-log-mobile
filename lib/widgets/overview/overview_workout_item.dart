@@ -1,31 +1,55 @@
-import 'package:expandable/expandable.dart';
+import 'dart:math';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/rendering.dart';
+import 'package:flutter/material.dart';
 import 'package:liftlogmobile/models/workout.dart';
 import 'package:liftlogmobile/utils/styles.dart';
 
 class ExpandedSection extends StatelessWidget {
-  final GlobalKey _widgetKey = GlobalKey();
   Workout _workout;
 
-  ExpandedSection(this._workout);
+  double heightPerItem = 25;
+  List<String> items = [];
 
-  double height() {
-    final RenderBox renderBox =
-        _widgetKey.currentContext?.findRenderObject() as RenderBox;
+  bool _expanded;
 
-    final Size size = renderBox.size;
-
-    return size.height;
+  ExpandedSection(this._workout, this._expanded) {
+    items = _workout.content.split(Workout.setSeparator);
   }
+
+  double totalHeight() => heightPerItem * items.length + 10;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(left: 15, bottom: 10),
-      child: Text(
-        _workout.content.split(Workout.setSeparator).join('\n'),
-        style: Styles.historySetHeader(context),
+      child: Column(
+        children: items.map((item) {
+          List<String> weightAndReps = item.split(Workout.weightRepsSeparator);
+
+          return _expanded
+              ? SizedBox(
+                  height: heightPerItem,
+                  child: Row(
+                    children: [
+                      Container(
+                          alignment: Alignment.centerRight,
+                          width: 60,
+                          child: Text(
+                            "${weightAndReps[0]} kg",
+                            style: Styles.overviewWorkoutContent(context),
+                          )),
+                      Container(
+                          alignment: Alignment.centerRight,
+                          width: 80,
+                          child: Text(
+                            "${weightAndReps[1]} reps",
+                            style: Styles.overviewWorkoutContent(context),
+                          )),
+                    ],
+                  ),
+                )
+              : Container();
+        }).toList(),
       ),
     );
   }
@@ -44,8 +68,9 @@ class OverviewWorkoutItem extends StatefulWidget {
 class _OverviewWorkoutItemState extends State<OverviewWorkoutItem>
     with SingleTickerProviderStateMixin {
   bool _expanded = false;
+
   late final AnimationController _controller = AnimationController(
-    duration: const Duration(milliseconds: 1000),
+    duration: const Duration(milliseconds: 600),
     vsync: this,
   );
   late final Animation<double> _heightAnimation =
@@ -63,11 +88,20 @@ class _OverviewWorkoutItemState extends State<OverviewWorkoutItem>
     });
   }
 
-  Widget _expandedSection() {
-    ExpandedSection content = ExpandedSection(widget._workout);
+  Widget _rotatingIcon(context) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 10),
+      child: Transform.rotate(
+          angle: pi * _heightAnimation.value,
+          child: Icon(CupertinoIcons.chevron_down)),
+    );
+  }
 
-    return Container(
-      height: 100 * _heightAnimation.value,
+  Widget _expandedSection_() {
+    ExpandedSection content = ExpandedSection(widget._workout, _expanded);
+
+    return SizedBox(
+      height: content.totalHeight() * _heightAnimation.value,
       child: content,
     );
   }
@@ -76,10 +110,15 @@ class _OverviewWorkoutItemState extends State<OverviewWorkoutItem>
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () async {
-        _expanded = !_expanded;
-        if (_expanded) {
-          _controller.forward();
+        if (!_expanded) {
+          await _controller.forward();
+          setState(() {
+            _expanded = !_expanded;
+          });
         } else {
+          setState(() {
+            _expanded = !_expanded;
+          });
           await _controller.reverse();
           _controller.reset();
         }
@@ -91,31 +130,35 @@ class _OverviewWorkoutItemState extends State<OverviewWorkoutItem>
             color: Styles.listItemBackground(context),
             borderRadius: const BorderRadius.all(Radius.circular(8)),
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          child: Column(
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Padding(
-                    padding:
-                        const EdgeInsets.only(left: 15, top: 10, bottom: 10),
-                    child: Text(
-                      widget._exerciseName,
-                      style: Styles.workoutListItemHeader(context),
-                    ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(
+                            left: 15, top: 10, bottom: 10),
+                        child: Text(
+                          widget._exerciseName,
+                          style: Styles.workoutListItemHeader(context),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 15, bottom: 10),
+                        child: Text(
+                          "${widget._workout.sets} Set${widget._workout.sets == 1 ? '' : 's'}",
+                          style: Styles.workoutListItemDetails(context),
+                        ),
+                      ),
+                    ],
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 15, bottom: 10),
-                    child: Text(
-                      "${widget._workout.sets} Set${widget._workout.sets == 1 ? '' : 's'}",
-                      style: Styles.workoutListItemDetails(context),
-                    ),
-                  ),
-                  _expandedSection()
+                  _rotatingIcon(context),
                 ],
               ),
-              Icon(CupertinoIcons.chevron_down),
+              _expandedSection_()
             ],
           ),
         ),

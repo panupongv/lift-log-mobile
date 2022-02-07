@@ -19,6 +19,7 @@ class OverviewSessionScreen extends StatefulWidget {
 }
 
 class _OverviewSessionScreenState extends State<OverviewSessionScreen> {
+  bool _loading = false;
   late List<Workout> _workouts = [];
 
   @override
@@ -27,10 +28,14 @@ class _OverviewSessionScreenState extends State<OverviewSessionScreen> {
   }
 
   void _loadWorkouts() async {
+    setState(() {
+      _loading = true;
+    });
     List<Workout> loadedWorkouts =
         await APIService.getWorkouts(widget._session);
     setState(() {
       _workouts = loadedWorkouts;
+      _loading = false;
     });
   }
 
@@ -45,11 +50,21 @@ class _OverviewSessionScreenState extends State<OverviewSessionScreen> {
           top: true,
           child: ListView(
             children: [sessionInfoSection(context, widget._session)] +
-                _workouts.map((workout) {
-                  Exercise? exercise = widget._exerciseMap[workout.exerciseId];
-                  String exerciseName = exercise != null? exercise.name : "Unknown Exercise";
-                  return OverviewWorkoutItem(exerciseName, workout);
-                }).toList(),
+                (_loading
+                    ? [
+                        const Padding(
+                          padding: EdgeInsets.only(top: 15),
+                          child: CupertinoActivityIndicator(),
+                        )
+                      ]
+                    : _workouts.map((workout) {
+                        Exercise? exercise =
+                            widget._exerciseMap[workout.exerciseId];
+                        String exerciseName = exercise != null
+                            ? exercise.name
+                            : "Unknown Exercise";
+                        return OverviewWorkoutItem(exerciseName, workout);
+                      }).toList()),
           )),
     );
   }

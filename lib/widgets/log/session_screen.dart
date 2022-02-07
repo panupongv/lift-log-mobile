@@ -85,10 +85,10 @@ class _SessionScreenState extends State<SessionScreen> {
                   child: ListView(
                     children: _loadingInitialList
                         ? [
-                            Container(
-                              height: 15,
-                            ),
-                            const CupertinoActivityIndicator()
+                            const Padding(
+                              padding: EdgeInsets.only(top: 15),
+                              child: CupertinoActivityIndicator(),
+                            )
                           ]
                         : _workouts.map((Workout wo) {
                             return WorkoutListItem(widget._session, wo,
