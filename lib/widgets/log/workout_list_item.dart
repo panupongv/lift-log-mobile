@@ -92,7 +92,7 @@ class _WorkoutListItemState extends State<WorkoutListItem> {
         widget._reloadWorkouts();
       },
       child: Padding(
-        padding: const EdgeInsets.only(top: 15, left: 10, right: 10),
+        padding: const EdgeInsets.only(top: 10, left: 10, right: 10, bottom: 5),
         child: Container(
           decoration: BoxDecoration(
             color: Styles.listItemBackground(context),

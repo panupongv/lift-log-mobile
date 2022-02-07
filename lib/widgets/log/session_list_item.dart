@@ -10,8 +10,10 @@ class SessionListItem extends StatefulWidget {
   final Session _session;
   final Function _reloadSessions;
   final Function _navigateToSession;
+  final bool showEllipses;
 
-  SessionListItem(this._session, this._reloadSessions, this._navigateToSession);
+  SessionListItem(this._session, this._reloadSessions, this._navigateToSession,
+      {this.showEllipses = true});
 
   @override
   State<SessionListItem> createState() => _SessionListItemState();
@@ -123,7 +125,7 @@ class _SessionListItemState extends State<SessionListItem> {
         widget._navigateToSession(widget._session);
       },
       child: Padding(
-        padding: const EdgeInsets.only(top: 15, left: 15, right: 15),
+        padding: const EdgeInsets.only(top: 8, left: 8, right: 8, bottom: 7),
         child: Container(
           decoration: BoxDecoration(
             color: Styles.listItemBackground(context),
@@ -131,63 +133,65 @@ class _SessionListItemState extends State<SessionListItem> {
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding:
-                        const EdgeInsets.only(left: 15, top: 10, bottom: 5),
-                    child: Text(
-                        TextUtils.trimOverflow(widget._session.name, 28),
-                        style: Styles.sessionListItemHeader(context)),
+            children: <Widget>[
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding:
+                            const EdgeInsets.only(left: 15, top: 10, bottom: 5),
+                        child: Text(
+                            TextUtils.trimOverflow(widget._session.name, 28),
+                            style: Styles.sessionListItemHeader(context)),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 15, bottom: 10),
+                        child: Row(
+                          children: [
+                                Icon(CupertinoIcons.calendar,
+                                    color: Styles.iconGrey(context)),
+                                Container(width: 5),
+                                SizedBox(
+                                  width: 75,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        widget._session.getDayOfWeek(),
+                                        style: Styles.sessionListItemDetails(
+                                            context),
+                                      ),
+                                      Text(
+                                        widget._session
+                                            .getDateInDisplayFormat(),
+                                        style: Styles.sessionListItemDetails(
+                                            context),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Container(width: 15),
+                              ] +
+                              (widget._session.location != ""
+                                  ? [
+                                      Icon(CupertinoIcons.location,
+                                          color: Styles.iconGrey(context)),
+                                      Container(width: 5),
+                                      Text(
+                                        TextUtils.trimOverflow(
+                                            widget._session.location, 14),
+                                        style: Styles.sessionListItemDetails(
+                                            context),
+                                      ),
+                                    ]
+                                  : []),
+                        ),
+                      ),
+                    ],
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 15, bottom: 10),
-                    child: Row(
-                      children: [
-                            Icon(CupertinoIcons.calendar,
-                                color: Styles.iconGrey(context)),
-                            Container(width: 5),
-                            SizedBox(
-                              width: 75,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    widget._session.getDayOfWeek(),
-                                    style:
-                                        Styles.sessionListItemDetails(context),
-                                  ),
-                                  Text(
-                                    widget._session.getDateInDisplayFormat(),
-                                    style:
-                                        Styles.sessionListItemDetails(context),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Container(width: 15),
-                          ] +
-                          (widget._session.location != ""
-                              ? [
-                                  Icon(CupertinoIcons.location,
-                                      color: Styles.iconGrey(context)),
-                                  Container(width: 5),
-                                  Text(
-                                    TextUtils.trimOverflow(
-                                        widget._session.location, 14),
-                                    style:
-                                        Styles.sessionListItemDetails(context),
-                                  ),
-                                ]
-                              : []),
-                    ),
-                  ),
-                ],
-              ),
-              ellipsisOptions(),
-            ],
+                ] +
+                (widget.showEllipses ? [ellipsisOptions()] : []),
           ),
         ),
       ),

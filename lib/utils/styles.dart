@@ -32,10 +32,16 @@ abstract class Styles {
   static Color defaultBackground(context) => _dynamicColor(context,
       CupertinoColors.lightBackgroundGray, CupertinoColors.darkBackgroundGray);
 
+  static Color calendarBackground(context) =>
+      _dynamicColor(context, CupertinoColors.white, CupertinoColors.black);
+
   static Color listItemBackground(context) =>
       _dynamicColor(context, CupertinoColors.white, CupertinoColors.black);
 
   static Color ellipsisIcon(context) => _dynamicGrey(context);
+
+  static Color calendarBorder(context) =>
+      _dynamicColor(context, CupertinoColors.black, CupertinoColors.white);
 
   static Color datePicker(context) =>
       _dynamicColor(context, CupertinoColors.white, CupertinoColors.black);
@@ -97,6 +103,40 @@ abstract class Styles {
 
   static TextStyle cautiousDialogAction(context, isActive) => TextStyle(
       color: isActive ? cautiousActionColor(context) : _dynamicGrey(context));
+
+  // Overview Tab TextStyles
+
+  static TextStyle calendarHeader(context) => TextStyle(
+      fontFamily: _defaultFontFamily,
+      fontWeight: FontWeight.bold,
+      fontSize: 17,
+      color: _defaultText(context));
+
+  static TextStyle calendarDayLabel(context) => TextStyle(
+      fontFamily: _defaultFontFamily,
+      fontSize: 14,
+      color: _defaultText(context));
+
+  static TextStyle calendarToday(context) => TextStyle(
+      fontFamily: _defaultFontFamily,
+      fontSize: 15,
+      color: _defaultText(context));
+
+  static TextStyle calendarNormalDay(context) => TextStyle(
+      fontFamily: _defaultFontFamily,
+      fontSize: 15,
+      color: _defaultText(context));
+
+  static TextStyle monthShiftButton(context) => TextStyle(
+      fontFamily: _defaultFontFamily,
+      fontSize: 17,
+      color: activeColor(context));
+
+  static TextStyle overviewWorkoutContent(context) => TextStyle(
+      fontFamily: _defaultFontFamily,
+      fontSize: 17,
+      fontWeight: FontWeight.bold,
+      color: _defaultText(context));
 
   // Log Tab TextStyles
 
